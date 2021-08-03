@@ -1,7 +1,6 @@
 package Complaints
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
 )
 type Complaint struct {
