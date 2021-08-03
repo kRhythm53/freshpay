@@ -16,13 +16,13 @@ type DBConfig struct {
 	DBName   string
 	Password string
 }
-func BuildDBConfig(database string) *DBConfig {
+func BuildDBConfig() *DBConfig {
 	dbConfig := DBConfig{
 		Host:     "localhost",
 		Port:     3306,
 		User:     "root",
 		Password: "sqlPass123",
-		DBName: database,
+		DBName: "freshpayDB",
 		//DBName:   "productsDB2",
 	}
 	return &dbConfig

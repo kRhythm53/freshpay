@@ -12,9 +12,9 @@ type Complaint struct {
 	ComplaintType 		string `json:"complaint_type"`
 	Status 			    string `json:"status"`
 	Remark 				string `json:"remark"`
-	PaymentId 			string `json:"payment_id"`
+	PaymentsId 			string `json:"payment_id"`
 	Payments Payments.Payments
 }
 func (c *Complaint) TableName() string {
-	return "Complaint"
+	return "complaint"
 }

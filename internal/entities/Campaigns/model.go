@@ -19,5 +19,5 @@ type Campaign struct {
 	PercentageRate    string    `json:"percentage_rate"`
 }
 func (c *Campaign) TableName() string {
-	return "Campaign"
+	return "campaign"
 }
