@@ -17,4 +17,4 @@ type Transactions struct {
 func (b *Payments) TableName() string {
 	return "payments"
 }
-
+//added a comment
