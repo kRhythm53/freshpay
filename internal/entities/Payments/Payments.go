@@ -1,8 +1,8 @@
-package entities
+package Payments
 
-import "github.com/jinzhu/gorm"
+import "gorm.io/gorm"
 
-type Transactions struct {
+type Payments struct {
 	gorm.Model
 	Id string `json:"id",gorm:"primaryKey"`
 	Amount uint `json:"amount"`
@@ -11,11 +11,8 @@ type Transactions struct {
 	DestinationId string `json:"destination_id"`
 	Type string `json:"type"`
 	Status     string `json:"status"`
-	PaymentId string `json:"payment_id"`
-	Payments Payments
 }
 
-func (b *Transactions) TableName() string {
-	return "Transactions"
+func (b *Payments) TableName() string {
+	return "payments"
 }
-//added a comment
