@@ -1,7 +1,13 @@
-package entities
+package Complaints
 
+import (
+	"github.com/jinzhu/gorm"
+	"time"
+)
 type Complaint struct {
-	gorm.Model
+	ID	 string `gorm:"primaryKey"  json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time ``json:"updated_at"
 	ComplaintType 		string `json:"complaint_type"`
 	Status 			    string `json:"status"`
 	Remark 				string `json:"remark"`
