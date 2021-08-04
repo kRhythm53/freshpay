@@ -1,9 +1,12 @@
-package Session
+package session
+
+import "gorm.io/gorm"
 
 type Detail struct {
-	EntityId string `json:"entity_id"`
-	UserId string `json:"user_id"`
-	ExpireTime uint64 `json:"expire_time"`
+	gorm.Model
+	ID         string `gorm:"type:varchar(20)"`
+	UserId     string
+	ExpireTime uint64
 }
 
 const (
