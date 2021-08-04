@@ -2,16 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/kshitij-nawandar9/freshpay/internal/Config"
-	"github.com/kshitij-nawandar9/freshpay/internal/entities/Admin"
-	"github.com/kshitij-nawandar9/freshpay/internal/entities/Campaigns"
-	"github.com/kshitij-nawandar9/freshpay/internal/entities/Complaints"
-	"github.com/kshitij-nawandar9/freshpay/internal/entities/Payments"
-	"github.com/kshitij-nawandar9/freshpay/internal/entities/UserManagement/Bank"
-	"github.com/kshitij-nawandar9/freshpay/internal/entities/UserManagement/Beneficiary"
-	"github.com/kshitij-nawandar9/freshpay/internal/entities/UserManagement/Session"
-	"github.com/kshitij-nawandar9/freshpay/internal/entities/UserManagement/User"
-	"github.com/kshitij-nawandar9/freshpay/internal/entities/UserManagement/Wallet"
+	"github.com/freshpay/internal/config"
+	"github.com/freshpay/internal/entities/admin"
+	"github.com/freshpay/internal/entities/campaigns"
+	"github.com/freshpay/internal/entities/complaints"
+	"github.com/freshpay/internal/entities/payments/payments"
+	"github.com/freshpay/internal/entities/payments/transactions"
+	"github.com/freshpay/internal/entities/user_management/bank"
+	"github.com/freshpay/internal/entities/user_management/beneficiary"
+	"github.com/freshpay/internal/entities/user_management/session"
+	"github.com/freshpay/internal/entities/user_management/user"
+	"github.com/freshpay/internal/entities/user_management/wallet"
 	"gorm.io/driver/mysql"
 	_ "gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -21,18 +22,18 @@ import (
 var err error
 
 func main() {
-	//Config.DB, err = gorm.Open("mysql", Config.DbURL(Config.BuildDBConfig()))
-	Config.DB, err = gorm.Open(mysql.Open(Config.DbURL(Config.BuildDBConfig())), &gorm.Config{})
+	//config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
+	config.DB, err = gorm.Open(mysql.Open(config.DbURL(config.BuildDBConfig())), &gorm.Config{})
 	if err != nil {
 		fmt.Println("Status:", err)
 	}
 
-	//defer Config.DB.Close()
-	Config.DB.AutoMigrate(&Payments.Payments{},&Payments.Transactions{})
-	Config.DB.AutoMigrate(&Campaigns.Campaign{},&Complaints.Complaint{})
-	Config.DB.AutoMigrate(&Admin.Detail{},&Bank.Detail{},&User.Detail{},&Beneficiary.Detail{},&Session.Detail{},&Wallet.Detail{})
-	//r := Routes.SetupRouter()
-	////running
+	//defer config.DB.Close()
+	config.DB.AutoMigrate(&payments.Payments{},&transactions.Transactions{})
+	config.DB.AutoMigrate(&campaigns.Campaign{},&complaints.Complaint{})
+	config.DB.AutoMigrate(&admin.Detail{},&bank.Detail{},&user.Detail{},&beneficiary.Detail{},&session.Detail{},&wallet.Detail{})
+	//r:=routes.SetupRouter()
+	//////running
 	//r.Run()
 
 }
