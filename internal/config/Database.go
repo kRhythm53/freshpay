@@ -22,7 +22,6 @@ func BuildDBConfig() *DBConfig {
 		User:     "root",
 		Password: "sqlPass123",
 		DBName: "freshpayDB",
-		//DBName:   "productsDB2",
 	}
 	return &dbConfig
 }
