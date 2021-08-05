@@ -1,18 +1,17 @@
 package complaints
 
 import (
-	"github.com/freshpay/internal/entities/payments/payments"
-	"gorm.io/gorm"
+	payments2 "github.com/freshpay/internal/entities/payments/payments"
 	_ "gorm.io/gorm"
 )
 type Complaint struct {
-	gorm.Model
+	//gorm.Model
 	ID            string `gorm:"type:varchar(20)"`
 	ComplaintType string
 	Status        string
 	Remark        string
 	PaymentsId    string
-	Payments      payments.Payments
+	Payments      payments2.Payments
 }
 func (c *Complaint) TableName() string {
 	return "complaint"
