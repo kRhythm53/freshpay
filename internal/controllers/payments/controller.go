@@ -19,8 +19,7 @@ func AddPayments(c *gin.Context) {
 
 	err2 := payments.AddPayments(&payment)
 	if err2 != nil {
-		fmt.Println(err.Error())
-		c.AbortWithStatus(http.StatusNotFound)
+		c.String(http.StatusOK,"Payment failed")
 	} else {
 		c.JSON(http.StatusOK, payment)
 	}
@@ -31,7 +30,7 @@ func GetPaymentByID(c *gin.Context) {
 	id := c.Params.ByName("payments_id")
 	err := payments.GetPaymentByID(&payment, id)
 	if err != nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		c.String(http.StatusOK,"Record not found")
 	} else {
 		c.JSON(http.StatusOK, payment)
 	}
@@ -59,7 +58,7 @@ func GetPaymentsByTime(c *gin.Context) {
 	fmt.Println(startTime,endTime)
 	err2 := payments.GetPaymentsByTime(&payment, startTime, endTime)
 	if err2 != nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		c.String(http.StatusOK,"Request failed.")
 	} else {
 		c.JSON(http.StatusOK, payment)
 	}

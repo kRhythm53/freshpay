@@ -29,6 +29,7 @@ func main() {
 	}
 
 	go transactions.InitiateTransaction()
+	go payments2.PaymentReceiver()
 
 	//defer config.DB.Close()
 	config.DB.AutoMigrate(&payments2.Payments{},&transactions.Transactions{})
