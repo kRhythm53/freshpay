@@ -1,7 +1,7 @@
 package complaints
 
 import (
-	"github.com/freshpay/internal/entities/payments/payments"
+	"github.com/freshpay/internal/entities/payments"
 	"gorm.io/gorm"
 	_ "gorm.io/gorm"
 )

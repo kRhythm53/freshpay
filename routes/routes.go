@@ -11,6 +11,8 @@ func SetupRouter() *gin.Engine {
 	grp1 := r.Group("/payments")
 	{
 		grp1.POST("", payments.AddPayment)
+		grp1.GET("/:payments_id", payments.GetPaymentByID)
+		grp1.GET("/",payments.GetPaymentsByTime)
 	}
 	return r
 }

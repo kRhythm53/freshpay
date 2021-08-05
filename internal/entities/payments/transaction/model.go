@@ -1,7 +1,7 @@
-package transactions
+package transaction
 
 import (
-	"github.com/freshpay/internal/entities/payments/payments"
+	"github.com/freshpay/internal/entities/payments"
 	"gorm.io/gorm"
 )
 
@@ -15,7 +15,7 @@ type Transactions struct {
 	Type          string
 	Status        string
 	PaymentsId    string `gorm:"type:varchar(20)"`
-	Payments payments.Payments
+	Payments      payments.Payments
 }
 
 func (b *Transactions) TableName() string {
