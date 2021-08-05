@@ -1,7 +1,7 @@
 package complaints
 
 import (
-	payments2 "github.com/freshpay/internal/entities/payments/payments"
+	"github.com/freshpay/internal/entities/payments/payments"
 	"gorm.io/gorm"
 	_ "gorm.io/gorm"
 )
@@ -12,7 +12,7 @@ type Complaint struct {
 	Status        string
 	Remark        string
 	PaymentsId    string
-	Payments      payments2.Payments
+	Payments      payments.Payments
 }
 func (c *Complaint) TableName() string {
 	return "complaint"

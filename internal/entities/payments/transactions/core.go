@@ -1,27 +1,47 @@
 package transactions
 
 import (
+	"fmt"
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/payments/payments"
 	"github.com/freshpay/internal/entities/payments/utilities"
+	"time"
 )
+func InitiateTransaction(){
+	for {
+		select {
+		case payment:=<-payments.PaymentsChannel:
+			err := AddTransactions(payment, "to razorpay account")
+			if err != nil {
+				return
+			}
+			err2 := AddTransactions(payment,"from razorpay account")
+			if err2 != nil {
+				return
+			}
+		}
+	}
+}
 
-func AddTransactions(payment payments.Payments,direction string) (err error) {
+func AddTransactions(payment *payments.Payments,direction string) (err error) {
 	var transaction Transactions
 	transaction.ID="trans_"+ utilities.RandomString(14)
 	transaction.Amount=payment.Amount
 	transaction.Currency=payment.Currency
 	if direction=="to razorpay account"{
 		transaction.SourceId=payment.SourceId
-		transaction.DestinationId="rzp account"
+		transaction.DestinationId="rzp_1234567890abcd"
 	}else{
-		transaction.SourceId="rzp account"
+		transaction.SourceId="rzp_1234567890abcd"
 		transaction.DestinationId=payment.DestinationId
 	}
 	transaction.Type=payment.Type
 	transaction.Status="processed"
 	transaction.PaymentsId=payment.ID
-
+	transaction.CreatedAt=time.Now().Unix()
+	transaction.UpdatedAt=time.Now().Unix()
+	fmt.Println("transaction : ",transaction)
+	fmt.Println("payment:",*payment)
 	if err = config.DB.Table("transactions").Create(transaction).Error; err != nil {
 		return err
 	}

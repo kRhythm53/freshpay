@@ -1,21 +1,22 @@
 package transactions
 
 import (
-	payments2 "github.com/freshpay/internal/entities/payments/payments"
-	"gorm.io/gorm"
+	"github.com/freshpay/internal/entities/payments/payments"
 )
 
 type Transactions struct {
-	gorm.Model
+	//gorm.Model
 	ID            string `gorm:"type:varchar(20)"`
+	CreatedAt     int64
+	UpdatedAt     int64
 	Amount        int64
 	Currency      string
-	SourceId      string
-	DestinationId string
+	SourceId      string `json:"source_id"`
+	DestinationId string `json:"destination_id"`
 	Type          string
 	Status        string
 	PaymentsId    string `gorm:"type:varchar(20)"`
-	Payments      payments2.Payments
+	Payments      payments.Payments
 }
 
 func (b *Transactions) TableName() string {

@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+var PaymentsChannel=make(chan *Payments,1000)
+
 func AddPayments(payment *Payments) (err error) {
 	if strings.HasPrefix(payment.SourceId,"wallt"){
 		if strings.HasPrefix(payment.DestinationId,"wallt"){
@@ -17,16 +19,8 @@ func AddPayments(payment *Payments) (err error) {
 		payment.Type="add to wallet"
 	}
 	payment.Status="processing"
-	payment.ID="paymt_"+ utilities.RandomString(14)
-
-
-	//errTransaction1:= transactions.AddTransactions(*payment,"to razorpay account")
-	//errTransaction2:= transactions.AddTransactions(*payment,"from razorpay account")
-	//if errTransaction1==nil && errTransaction2==nil{
-	//	payment.Status="processed"
-	//}else{
-	//	payment.Status="failed"
-	//}
+	payment.ID="paymt_"+utilities.RandomString(14)
+	PaymentsChannel<-payment
 	if err = config.DB.Table("payments").Create(payment).Error; err != nil {
 		return err
 	}

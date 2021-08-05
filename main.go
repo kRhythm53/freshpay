@@ -28,6 +28,8 @@ func main() {
 		fmt.Println("Status:", err)
 	}
 
+	go transactions.InitiateTransaction()
+
 	//defer config.DB.Close()
 	config.DB.AutoMigrate(&payments2.Payments{},&transactions.Transactions{})
 	config.DB.AutoMigrate(&campaigns.Campaign{},&complaints.Complaint{})
