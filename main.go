@@ -6,8 +6,8 @@ import (
 	"github.com/freshpay/internal/entities/admin"
 	"github.com/freshpay/internal/entities/campaigns"
 	"github.com/freshpay/internal/entities/complaints"
-	"github.com/freshpay/internal/entities/payments"
-	"github.com/freshpay/internal/entities/payments/transaction"
+	payments2 "github.com/freshpay/internal/entities/payments/payments"
+	"github.com/freshpay/internal/entities/payments/transactions"
 	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/freshpay/internal/entities/user_management/beneficiary"
 	"github.com/freshpay/internal/entities/user_management/session"
@@ -29,7 +29,7 @@ func main() {
 	}
 
 	//defer config.DB.Close()
-	config.DB.AutoMigrate(&payments.Payments{},&transaction.Transactions{})
+	config.DB.AutoMigrate(&payments2.Payments{},&transactions.Transactions{})
 	config.DB.AutoMigrate(&campaigns.Campaign{},&complaints.Complaint{})
 	config.DB.AutoMigrate(&admin.Detail{},&bank.Detail{},&user.Detail{},&beneficiary.Detail{},&session.Detail{},&wallet.Detail{})
 	r:=routes.SetupRouter()

@@ -1,4 +1,4 @@
-package payments
+package utilities
 
 import "math/rand"
 
