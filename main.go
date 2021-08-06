@@ -36,7 +36,6 @@ func main() {
 	config.DB.AutoMigrate(&campaigns.Campaign{},&complaints.Complaint{})
 	config.DB.AutoMigrate(&admin.Detail{},&bank.Detail{},&user.Detail{},&beneficiary.Detail{},&session.Detail{},&wallet.Detail{})
 	r:=routes.SetupRouter()
-	//////running
-	//r.Run()
-
+	////running
+	r.Run()
 }
