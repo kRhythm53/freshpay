@@ -13,6 +13,7 @@ import (
 	"github.com/freshpay/internal/entities/user_management/session"
 	"github.com/freshpay/internal/entities/user_management/user"
 	"github.com/freshpay/internal/entities/user_management/wallet"
+	"github.com/freshpay/routes"
 	"gorm.io/driver/mysql"
 	_ "gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -32,8 +33,8 @@ func main() {
 	config.DB.AutoMigrate(&payments.Payments{},&transactions.Transactions{})
 	config.DB.AutoMigrate(&campaigns.Campaign{},&complaints.Complaint{})
 	config.DB.AutoMigrate(&admin.Detail{},&bank.Detail{},&user.Detail{},&beneficiary.Detail{},&session.Detail{},&wallet.Detail{})
-	//r:=routes.SetupRouter()
+	r:=routes.SetupRouter()
 	//////running
-	//r.Run()
+	r.Run()
 
 }

@@ -21,3 +21,4 @@ func AddPayment(c *gin.Context) {
 		c.JSON(http.StatusOK, payment)
 	}
 }
+
