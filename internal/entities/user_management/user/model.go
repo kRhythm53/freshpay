@@ -9,11 +9,13 @@ type Detail struct {
 	PhoneNumber string
 	Password    string
 	Email       string
+	NumberOfTransactions int64 `gorm:"default:0"`
 }
 
 const (
 	TableName="user"
 	EntityName="user"
+	Prefix="user"
 )
 func(sd *Detail) TableName() string{
 	return TableName

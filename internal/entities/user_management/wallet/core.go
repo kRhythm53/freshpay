@@ -8,9 +8,7 @@ import (
 //CreateWallet will create a new wallet
 func CreateWallet(userId string)(err error){
 	var wallet Detail
-	wallet.ID=utilities.CreateID(14)
-	wallet.Balance=0
-	wallet.Currency="INR"
+	wallet.ID=utilities.CreateID(Prefix,14)
 	wallet.UserId=userId
 
 	if err=config.DB.Create(&wallet).Error; err!=nil{

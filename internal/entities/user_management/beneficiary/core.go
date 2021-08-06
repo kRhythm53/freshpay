@@ -7,7 +7,7 @@ import (
 
 //CreateBeneficiary will create a new beneficiary
 func CreateBeneficiary(beneficiary *Detail,userId string)(err error){
-	beneficiary.ID=utilities.CreateID(14)
+	beneficiary.ID=utilities.CreateID(Prefix,14)
 	beneficiary.UserId=userId
 	if err=config.DB.Create(beneficiary).Error; err!=nil{
 		return err

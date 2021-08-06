@@ -35,7 +35,7 @@ func SignUp(user *Detail) (err error){
 		err=errors.New("OTP entered is wrong, Try again")
 		return err
 	}
-	user.ID=utilities.CreateID(14)
+	user.ID=utilities.CreateID(Prefix,14)
 
 	if err=config.DB.Create(user).Error; err!=nil{
 		return err

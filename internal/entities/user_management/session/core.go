@@ -9,8 +9,8 @@ import (
 
 //CreateSession will create a new session
 func CreateSession(session *Detail)(err error){
-	session.ID=utilities.CreateID(14)
-	session.ExpireTime=uint64(time.Now().Unix()+300)
+	session.ID=utilities.CreateID(Prefix,14)
+	session.ExpireTime=uint64(time.Now().Unix()+ExpireTime)
 
 	if err=config.DB.Create(session).Error; err!=nil{
 		return err

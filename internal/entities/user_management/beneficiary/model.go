@@ -15,6 +15,7 @@ type Detail struct {
 const (
 	TableName="beneficiary"
 	EntityName="beneficiary"
+	Prefix="ben"
 )
 func(sd *Detail) TableName() string{
 	return TableName

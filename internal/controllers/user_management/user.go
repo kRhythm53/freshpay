@@ -31,6 +31,8 @@ func LoginByPassword(c *gin.Context){
 	if err!=nil{
 		c.AbortWithError(400,err)
 	} else{
-		c.JSON(http.StatusOK,Session)
+		c.JSON(http.StatusOK,gin.H{
+			"session_id":Session.ID,
+		})
 	}
 }

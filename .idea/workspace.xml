@@ -2,21 +2,22 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f5cbc8a4-97c9-4992-8fc6-87936f9d3cad" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/internal/controllers/user_management/bank.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/controllers/user_management/beneficiary.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/controllers/user_management/session.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/controllers/user_management/user.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/controllers/user_management/wallet.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/config/Database.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/config/Database.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/controllers/payments/controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/controllers/payments/controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/controllers/user_management/bank.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/controllers/user_management/bank.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/controllers/user_management/beneficiary.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/controllers/user_management/beneficiary.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/controllers/user_management/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/controllers/user_management/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/controllers/user_management/wallet.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/controllers/user_management/wallet.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/user_management/bank/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/bank/core.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/entities/user_management/bank/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/bank/model.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/user_management/beneficiary/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/beneficiary/core.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/entities/user_management/beneficiary/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/beneficiary/model.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/user_management/session/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/session/core.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/entities/user_management/session/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/session/model.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/user_management/user/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/user/core.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/entities/user_management/user/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/user/model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/entities/user_management/utilities/commonMethods.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/utilities/commonMethods.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/user_management/wallet/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/wallet/core.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/user_management/wallet/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/wallet/model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/routes/routes.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -34,6 +35,14 @@
   <component name="GOROOT" url="file:///usr/local/go" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
