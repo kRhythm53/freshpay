@@ -3,13 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="f5cbc8a4-97c9-4992-8fc6-87936f9d3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/controllers/payments/controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/controllers/payments/controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/entities/payments/payments/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/payments/payments/core.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/constants/constants.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/constants/constants.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/payments/payments/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/payments/payments/model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/entities/payments/payments/repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/payments/payments/repo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/entities/payments/transactions/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/payments/transactions/core.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/payments/transactions/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/payments/transactions/model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/entities/payments/utilities/util.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/payments/utilities/util.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
