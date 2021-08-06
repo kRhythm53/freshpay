@@ -3,6 +3,7 @@ package payments
 import (
 	"errors"
 	"github.com/freshpay/internal/config"
+	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/payments/utilities"
 	"strconv"
 	"strings"
@@ -29,7 +30,7 @@ func GetPaymentByID(payment *Payments, id string) (err error) {
 	return GetPaymentByIDFromDB(payment,id)
 }
 
-func GetPaymentsByTime(payments *[]Payments, from string,to string ) (err error) {
+func GetPaymentsByTime(payments *[]Payments, from string,to string,userID string ) (err error) {
 	var startTime, endTime int64
 	if from == "" {
 		startTime = time.Now().Unix()
@@ -44,7 +45,7 @@ func GetPaymentsByTime(payments *[]Payments, from string,to string ) (err error)
 	} else {
 		endTime, err = strconv.ParseInt(to, 10, 64)
 	}
-	return GetPaymentByTimeFromDB(payments,startTime,endTime)
+	return GetPaymentByTimeFromDB(payments,startTime,endTime,userID)
 }
 
 func UpdatePayment(payment *Payments) (err error) {
@@ -65,7 +66,7 @@ func PaymentReceiver() {
 
 func GetUserID(searchID string) (err error,userID string) {
 	var table string
-	if strings.HasPrefix(searchID,WalletPrefix){
+	if strings.HasPrefix(searchID, constants.WalletPrefix){
 		table="wallet"
 	}else{
 		table="bank"
@@ -77,14 +78,14 @@ func GetUserID(searchID string) (err error,userID string) {
 }
 
 func GetPaymentType(payment *Payments) string{
-	if strings.HasPrefix(payment.SourceId,WalletPrefix){
-		if strings.HasPrefix(payment.DestinationId,WalletPrefix){
-			return PaymentTypeWalletTransfer
+	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix){
+		if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix){
+			return constants.PaymentTypeWalletTransfer
 		}else{
-			return PaymentTypeBankWithdrawal
+			return constants.PaymentTypeBankWithdrawal
 		}
 	}else{
-		return PaymentTypeAddToWallet
+		return constants.PaymentTypeAddToWallet
 	}
 }
 
@@ -98,5 +99,5 @@ func ValidityCheck(payment *Payments) (err error ){
 }
 
 func GenerateID() string{
-	return IDPrefix+utilities.RandomString(14)
+	return utilities.RandomString(14,constants.IDPrefix)
 }

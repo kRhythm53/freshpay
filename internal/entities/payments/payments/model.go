@@ -1,17 +1,15 @@
 package payments
 
-var IDPrefix = "paymt_"
-var WalletPrefix = "wallt_"
-var BankPrefix = "bank_"
-var PaymentTypeWalletTransfer = "wallet transfer"
-var PaymentTypeBankWithdrawal = "bank withdrawal"
-var PaymentTypeAddToWallet = "add to wallet"
+import (
+	"github.com/freshpay/internal/constants"
+)
 
 type Payments struct {
 	//gorm.Model
-	ID            string `gorm:"type:varchar(20)"`
-	CreatedAt     int64
-	UpdatedAt     int64
+	//ID            string `gorm:"type:varchar(20)"`
+	//CreatedAt     int64
+	//UpdatedAt     int64
+	constants.Model
 	Amount        int64
 	Currency      string
 	SourceId      string `json:"source_id"`
