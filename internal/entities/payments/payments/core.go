@@ -4,7 +4,9 @@ import (
 	"errors"
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/payments/utilities"
+	"strconv"
 	"strings"
+	"time"
 )
 
 var InputPaymentsChannel =make(chan *Payments,1000)
@@ -13,36 +15,40 @@ var ResultsPaymentsChannel=make(chan *Payments,1000)
 func AddPayments(payment *Payments) (err error) {
 	payment.Type=GetPaymentType(payment)
 	payment.Status="processing"
-	payment.ID="paymt_"+utilities.RandomString(14)
+	payment.ID=GenerateID()
 	//err=ValidityCheck(payment)
 	//if err!=nil{
 	//	return err
 	//}
 	InputPaymentsChannel <-payment
-	if err= config.DB.Table("payments").Create(payment).Error; err != nil {
-		return err
-	}
-	return nil
+
+	return AddPaymentToDB(payment)
 }
 
 func GetPaymentByID(payment *Payments, id string) (err error) {
-	if err = config.DB.Table("payments").Where("id = ?", id).First(payment).Error; err != nil {
-		return err
-	}
-	return nil
+	return GetPaymentByIDFromDB(payment,id)
 }
 
-func GetPaymentsByTime(payments *[]Payments, startTime int64,endTime int64 ) (err error) {
-
-	if err = config.DB.Table("payments").Where("created_at > ? AND created_at < ?", startTime, endTime).Find(payments).Error; err != nil {
-		return err
+func GetPaymentsByTime(payments *[]Payments, from string,to string ) (err error) {
+	var startTime, endTime int64
+	if from == "" {
+		startTime = time.Now().Unix()
+	} else {
+		startTime, err = strconv.ParseInt(from, 10, 64)
+		if err != nil {
+			return
+		}
 	}
-	return nil
+	if to == "" {
+		endTime = time.Now().Unix()
+	} else {
+		endTime, err = strconv.ParseInt(to, 10, 64)
+	}
+	return GetPaymentByTimeFromDB(payments,startTime,endTime)
 }
 
 func UpdatePayment(payment *Payments) (err error) {
-	config.DB.Table("payments").Save(payment)
-	return nil
+	return UpdatePaymentToDB(payment)
 }
 
 func PaymentReceiver() {
@@ -59,7 +65,7 @@ func PaymentReceiver() {
 
 func GetUserID(searchID string) (err error,userID string) {
 	var table string
-	if strings.HasPrefix(searchID,"wallt"){
+	if strings.HasPrefix(searchID,WalletPrefix){
 		table="wallet"
 	}else{
 		table="bank"
@@ -71,14 +77,14 @@ func GetUserID(searchID string) (err error,userID string) {
 }
 
 func GetPaymentType(payment *Payments) string{
-	if strings.HasPrefix(payment.SourceId,"wallt"){
-		if strings.HasPrefix(payment.DestinationId,"wallt"){
-			return "wallet transfer"
+	if strings.HasPrefix(payment.SourceId,WalletPrefix){
+		if strings.HasPrefix(payment.DestinationId,WalletPrefix){
+			return PaymentTypeWalletTransfer
 		}else{
-			return "bank withdrawal"
+			return PaymentTypeBankWithdrawal
 		}
 	}else{
-		return "add to wallet"
+		return PaymentTypeAddToWallet
 	}
 }
 
@@ -89,4 +95,8 @@ func ValidityCheck(payment *Payments) (err error ){
 		return errors.New("destination not found")
 	}
 	return nil
+}
+
+func GenerateID() string{
+	return IDPrefix+utilities.RandomString(14)
 }

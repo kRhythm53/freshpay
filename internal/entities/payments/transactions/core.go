@@ -12,13 +12,13 @@ func InitiateTransaction(){
 		select {
 		case payment:=<-payments.InputPaymentsChannel:
 			err := AddTransactions(payment, "to razorpay account")
-			if err != nil {
-				return
-			}
 			err2 := AddTransactions(payment,"from razorpay account")
-			if err2 != nil {
-				return
+			if err != nil || err2!=nil{
+				payment.Status="failed"
+			}else{
+				payment.Status="processed"
 			}
+			payments.ResultsPaymentsChannel<-payment
 		}
 	}
 }
@@ -45,8 +45,6 @@ func AddTransactions(payment *payments.Payments,direction string) (err error) {
 	if err = config.DB.Table("transactions").Create(transaction).Error; err != nil {
 		return err
 	}
-	payment.Status="processed"
-	payments.ResultsPaymentsChannel<-payment
 	return nil
 }
 
