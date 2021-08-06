@@ -6,15 +6,15 @@ import (
 	"github.com/freshpay/internal/entities/admin"
 	"github.com/freshpay/internal/entities/campaigns"
 	"github.com/freshpay/internal/entities/complaints"
-	"github.com/freshpay/internal/entities/payments/payments"
+	payments2 "github.com/freshpay/internal/entities/payments/payments"
 	"github.com/freshpay/internal/entities/payments/transactions"
 	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/freshpay/internal/entities/user_management/beneficiary"
 	"github.com/freshpay/internal/entities/user_management/session"
 	"github.com/freshpay/internal/entities/user_management/user"
 	"github.com/freshpay/internal/entities/user_management/wallet"
+	"github.com/freshpay/routes"
 	"gorm.io/driver/mysql"
-	_ "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -28,12 +28,15 @@ func main() {
 		fmt.Println("Status:", err)
 	}
 
+	go transactions.InitiateTransaction()
+	go payments2.PaymentReceiver()
+
 	//defer config.DB.Close()
-	config.DB.AutoMigrate(&payments.Payments{},&transactions.Transactions{})
+	config.DB.AutoMigrate(&payments2.Payments{},&transactions.Transactions{})
 	config.DB.AutoMigrate(&campaigns.Campaign{},&complaints.Complaint{})
 	config.DB.AutoMigrate(&admin.Detail{},&bank.Detail{},&user.Detail{},&beneficiary.Detail{},&session.Detail{},&wallet.Detail{})
-	//r:=routes.SetupRouter()
-	//////running
-	//r.Run()
+	r:=routes.SetupRouter()
+	////running
+	r.Run()
 
 }
