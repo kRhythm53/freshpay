@@ -3,6 +3,7 @@ package transactions
 import (
 	"fmt"
 	"github.com/freshpay/internal/config"
+	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/payments/payments"
 	"github.com/freshpay/internal/entities/payments/utilities"
 	"time"
@@ -25,7 +26,7 @@ func InitiateTransaction(){
 
 func AddTransactions(payment *payments.Payments,direction string) (err error) {
 	var transaction Transactions
-	transaction.ID="trans_"+ utilities.RandomString(14)
+	transaction.ID= utilities.RandomString(14,constants.TransactionPrefix)
 	transaction.Amount=payment.Amount
 	transaction.Currency=payment.Currency
 	if direction=="to razorpay account"{
