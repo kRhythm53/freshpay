@@ -12,7 +12,7 @@ type Detail struct {
 const (
 	TableName="session"
 	EntityName="session"
-	ExpireTime=300  //time in seconds
+	ExpireTime=30000  //time in seconds
 	Prefix="sUsr"
 )
 

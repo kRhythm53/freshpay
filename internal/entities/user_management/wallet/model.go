@@ -7,7 +7,7 @@ type Detail struct {
 	ID       string `gorm:"type:varchar(20)"`
 	UserId   string
 	Balance  int  `gorm:"default:0"`
-	Currency string `gorm:"default:INR"`
+	Currency string	`gorm:"default:'INR'"`
 }
 
 const (

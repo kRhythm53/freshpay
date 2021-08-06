@@ -10,7 +10,6 @@ func CreateWallet(userId string)(err error){
 	var wallet Detail
 	wallet.ID=utilities.CreateID(Prefix,14)
 	wallet.UserId=userId
-
 	if err=config.DB.Create(&wallet).Error; err!=nil{
 		return err
 	}

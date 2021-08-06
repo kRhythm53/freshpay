@@ -29,7 +29,7 @@ func LoginByPassword(c *gin.Context){
 	var Session session.Detail
 	err:=user.LoginByPassword(loginInfo.PhoneNumber,loginInfo.Password,&Session)
 	if err!=nil{
-		c.AbortWithError(400,err)
+		c.AbortWithError(http.StatusNotFound,err)
 	} else{
 		c.JSON(http.StatusOK,gin.H{
 			"session_id":Session.ID,
