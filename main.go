@@ -38,4 +38,5 @@ func main() {
 	r:=routes.SetupRouter()
 	////running
 	r.Run()
+
 }
