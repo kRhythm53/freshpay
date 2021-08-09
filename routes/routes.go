@@ -30,5 +30,9 @@ func SetupRouter() *gin.Engine {
 
 		grp2.GET("balance",user_management.GetWalletBalance)
 	}
+	grp3:= r.Group("/campaigns")
+	{
+		grp3.POST("")
+	}
 	return r
 }
