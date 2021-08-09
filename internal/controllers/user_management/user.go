@@ -8,7 +8,7 @@ import (
 )
 
 /*
-	CreateProduct will add a new product to the database
+	SignUp will signup the user
 */
 func SignUp(c *gin.Context) {
 	var User user.Detail
