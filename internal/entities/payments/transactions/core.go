@@ -2,7 +2,6 @@ package transactions
 
 import (
 	"fmt"
-	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/payments/payments"
 	"github.com/freshpay/internal/entities/payments/utilities"
@@ -43,9 +42,6 @@ func AddTransactions(payment *payments.Payments,direction string) (err error) {
 	transaction.UpdatedAt=time.Now().Unix()
 	fmt.Println("transaction : ",transaction)
 	fmt.Println("payment:",*payment)
-	if err = config.DB.Table("transactions").Create(transaction).Error; err != nil {
-		return err
-	}
-	return nil
+	return AddTransactionToDB(transaction)
 }
 

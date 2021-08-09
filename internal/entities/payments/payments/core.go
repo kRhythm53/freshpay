@@ -2,9 +2,10 @@ package payments
 
 import (
 	"errors"
-	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/payments/utilities"
+	"github.com/freshpay/internal/entities/user_management/bank"
+	"github.com/freshpay/internal/entities/user_management/wallet"
 	"strconv"
 	"strings"
 	"time"
@@ -17,10 +18,10 @@ func AddPayments(payment *Payments) (err error) {
 	payment.Type=GetPaymentType(payment)
 	payment.Status="processing"
 	payment.ID=GenerateID()
-	//err=ValidityCheck(payment)
-	//if err!=nil{
-	//	return err
-	//}
+	err=ValidityCheck(payment)
+	if err!=nil{
+		return err
+	}
 	InputPaymentsChannel <-payment
 
 	return AddPaymentToDB(payment)
@@ -49,6 +50,7 @@ func GetPaymentsByTime(payments *[]Payments, from string,to string,userID string
 }
 
 func UpdatePayment(payment *Payments) (err error) {
+	Eligibility(payment *Payment,userID string)
 	return UpdatePaymentToDB(payment)
 }
 
@@ -64,19 +66,6 @@ func PaymentReceiver() {
 	}
 }
 
-func GetUserID(searchID string) (err error,userID string) {
-	var table string
-	if strings.HasPrefix(searchID, constants.WalletPrefix){
-		table="wallet"
-	}else{
-		table="bank"
-	}
-	if err = config.DB.Table(table).Where("id = ?", searchID).First(userID).Error; err != nil {
-		return err,""
-	}
-	return nil,userID
-}
-
 func GetPaymentType(payment *Payments) string{
 	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix){
 		if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix){
@@ -90,14 +79,44 @@ func GetPaymentType(payment *Payments) string{
 }
 
 func ValidityCheck(payment *Payments) (err error ){
-	if err,_:=GetUserID(payment.SourceId);err!=nil{
-		return errors.New("source not found")
-	}else if err,_:=GetUserID(payment.DestinationId);err!=nil{
-		return errors.New("destination not found")
+	var balance int
+	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix){
+		var Source *wallet.Detail
+		err := wallet.GetWalletById(Source, payment.SourceId)
+		if err != nil {
+			return err
+		}
+		balance=Source.Balance
+	} else{
+		var Source *bank.Detail
+		err := bank.GetBankById(Source, payment.SourceId)
+		if err != nil {
+			return err
+		}
+	}
+	if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix){
+		var Destination *wallet.Detail
+		err := wallet.GetWalletById(Destination, payment.SourceId)
+		if err != nil {
+			return err
+		}
+	} else{
+		var Destination *bank.Detail
+		err := bank.GetBankById(Destination, payment.SourceId)
+		if err != nil {
+			return err
+		}
+	}
+	if balance<int(payment.Amount){
+		return errors.New("low wallet balance")
 	}
 	return nil
 }
 
 func GenerateID() string{
 	return utilities.RandomString(14,constants.IDPrefix)
+}
+
+func InitiateRefund(amount int64,paymentID string)(err error){
+
 }
