@@ -19,7 +19,7 @@ func CreateBank(bank *Detail,userId string)(err error){
 
 //GetBankById will return the bank by using the id
 func GetBankById(bank *Detail, id string)(err error){
-	if err = config.DB.Where("ID = ?", id).First(bank).Error; err != nil {
+	if err = config.DB.Table("bank").Where("ID = ?", id).First(bank).Error; err != nil {
 		return err
 	}
 	return nil

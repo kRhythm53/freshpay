@@ -2,8 +2,8 @@ package constants
 
 const (
 	IDPrefix                  = "paymt"
-	WalletPrefix              = "wallt"
-	BankPrefix                = "bank"
+	WalletPrefix              = "wal"
+	BankPrefix                = "bnk"
 	TransactionPrefix         = "trans"
 	PaymentTypeWalletTransfer = "wallet transfer"
 	PaymentTypeBankWithdrawal = "bank withdrawal"

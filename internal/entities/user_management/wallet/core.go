@@ -25,8 +25,8 @@ func GetWalletById(wallet *Detail,id string)(err error){
 }
 
 func GetWalletByUserId(wallet *Detail,userId string)(err error){
-	if err=config.DB.Where("user_id = ?",userId).First(wallet).Error;err!=nil{
-		return err;
+	if err=config.DB.Table("wallet").Where("user_id = ?",userId).First(wallet).Error;err!=nil{
+		return err
 	}
 	return nil
 }

@@ -18,9 +18,14 @@ func GetCampaign(c *gin.Context) {
 
 func CreateCampaign(c *gin.Context) {
 	var user campaigns.Campaign
-	c.BindJSON(&user)
-	err := campaigns.CreateCampaign(&user)
+	err := c.BindJSON(&user)
 	if err != nil {
+		fmt.Println("could not read json")
+		return
+	}
+	fmt.Println(&user)
+	err2 := campaigns.CreateCampaign(&user)
+	if err2 != nil {
 		fmt.Println(err.Error())
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {

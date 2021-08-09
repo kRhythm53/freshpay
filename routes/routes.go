@@ -1,6 +1,7 @@
 package routes
 
 import (
+	campaigns "github.com/freshpay/internal/controllers/campaign"
 	"github.com/freshpay/internal/controllers/payments"
 	"github.com/freshpay/internal/controllers/user_management"
 	"github.com/freshpay/middleware"
@@ -29,6 +30,13 @@ func SetupRouter() *gin.Engine {
 		grp2.GET("beneficiary",user_management.GetAllBeneficiaryByUserId)
 
 		grp2.GET("balance",user_management.GetWalletBalance)
+	}
+	grp3:= r.Group("/campaigns")
+	{
+		grp3.POST("/",campaigns.CreateCampaign)
+		grp3.GET("/",campaigns.GetCampaign)
+		grp3.GET("/:campaign_id",campaigns.GetCampaignByID)
+		grp3.PATCH("/:campaign_id",campaigns.UpdateCampaign)
 	}
 	return r
 }
