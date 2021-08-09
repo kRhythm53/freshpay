@@ -3,8 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="f5cbc8a4-97c9-4992-8fc6-87936f9d3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+<<<<<<< HEAD
       <change beforePath="$PROJECT_DIR$/internal/entities/payments/payments/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/payments/payments/core.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/payments/transactions/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/payments/transactions/core.go" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/internal/entities/campaigns/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/campaigns/model.go" afterDir="false" />
+>>>>>>> 884db3cf45dd9cb61e0ad27d2ddb9b1ba56b598f
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

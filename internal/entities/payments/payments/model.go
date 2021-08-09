@@ -5,10 +5,6 @@ import (
 )
 
 type Payments struct {
-	//gorm.Model
-	//ID            string `gorm:"type:varchar(20)"`
-	//CreatedAt     int64
-	//UpdatedAt     int64
 	base.Model
 	Amount        int64
 	Currency      string

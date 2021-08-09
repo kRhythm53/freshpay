@@ -11,8 +11,13 @@ func InitiateTransaction(){
 	for {
 		select {
 		case payment:=<-payments.InputPaymentsChannel:
-			err := AddTransactions(payment, "to razorpay account")
-			err2 := AddTransactions(payment,"from razorpay account")
+			var err,err2 error
+			if payment.Type=="Cashback" || payment.Type=="Refund"{
+				err=AddTransactions(payment,"from razorpay account")
+			}else{
+				err = AddTransactions(payment, "to razorpay account")
+				err2 = AddTransactions(payment,"from razorpay account")
+			}
 			if err != nil || err2!=nil{
 				payment.Status="failed"
 			}else{

@@ -3,6 +3,7 @@ package payments
 import (
 	"errors"
 	"github.com/freshpay/internal/constants"
+	"github.com/freshpay/internal/entities/campaigns"
 	"github.com/freshpay/internal/entities/payments/utilities"
 	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/freshpay/internal/entities/user_management/wallet"
@@ -50,7 +51,10 @@ func GetPaymentsByTime(payments *[]Payments, from string,to string,userID string
 }
 
 func UpdatePayment(payment *Payments) (err error) {
-	Eligibility(payment *Payment,userID string)
+	err2 := InitiateCashback(payment)
+	if err2 != nil {
+		return err2
+	}
 	return UpdatePaymentToDB(payment)
 }
 
@@ -117,6 +121,61 @@ func GenerateID() string{
 	return utilities.RandomString(14,constants.IDPrefix)
 }
 
-func InitiateRefund(amount int64,paymentID string)(err error){
+func InitiateRefund(paymentID string,UserID string)(err error){
+	var RefundPayment Payments
 
+	var payment *Payments
+	err2 := GetPaymentByID(payment,paymentID)
+	if err2 != nil {
+		return err2
+	}
+
+	var RefundWallet *wallet.Detail
+	err3 := wallet.GetWalletByUserId(RefundWallet,UserID)
+	if err3 != nil {
+		return err3
+	}
+
+	RefundPayment.ID=GenerateID()
+	RefundPayment.Amount=payment.Amount
+	RefundPayment.Currency="INR"
+	RefundPayment.SourceId="Razorpay account"
+	RefundPayment.DestinationId=RefundWallet.ID
+	RefundPayment.Type="Cashback"
+	RefundPayment.Status="processing"
+	InputPaymentsChannel <-&RefundPayment
+	return nil
+}
+//payments.InitiateRefund(Complaint.PaymentsId,Complaint.UserId)
+
+func InitiateCashback(payment *Payments)(err error){
+	var userID string
+	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix){
+		var Source *wallet.Detail
+		err := wallet.GetWalletById(Source, payment.SourceId)
+		if err != nil {
+			return err
+		}
+		userID=Source.UserId
+	} else{
+		var Source *bank.Detail
+		err := bank.GetBankById(Source, payment.SourceId)
+		if err != nil {
+			return err
+		}
+		userID=Source.UserId
+	}
+	Cashback:=campaigns.Eligibility(payment,userID)
+	if Cashback>0{
+		var CashbackPayment Payments
+		CashbackPayment.ID=GenerateID()
+		CashbackPayment.Amount=int64(Cashback)
+		CashbackPayment.Currency="INR"
+		CashbackPayment.SourceId="Razorpay account"
+		CashbackPayment.DestinationId=payment.SourceId
+		CashbackPayment.Type="Cashback"
+		CashbackPayment.Status="processing"
+		InputPaymentsChannel <-&CashbackPayment
+	}
+	return nil
 }
