@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"github.com/freshpay/internal/controllers/admin_management"
+	"github.com/freshpay/internal/controllers/complaints"
 	"github.com/freshpay/internal/controllers/payments"
 	"github.com/freshpay/internal/controllers/user_management"
 	"github.com/freshpay/middleware"
@@ -30,5 +32,16 @@ func SetupRouter() *gin.Engine {
 
 		grp2.GET("balance",user_management.GetWalletBalance)
 	}
+
+	grp4:= r.Group("/admin")
+	{
+		grp4.POST("signup",admin_management.SignUp)
+		grp4.POST("signin",admin_management.LoginByPassword)
+		grp4.GET("complaints",complaints.GetComplaints)
+		grp4.GET("active_complaints",complaints.GetActiveComplaints)
+		grp4.GET("complaint/:complaint_id",complaints.GetComplaintById)
+		grp4.PATCH("complaint/:complaint_id",complaints.UpdateComplaintById)
+	}
+
 	return r
 }

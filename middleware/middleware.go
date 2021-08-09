@@ -22,9 +22,10 @@ var userPath=[]string{
 }
 
 var adminPath=[]string{
-
+	"/admin/complaint",
+	"/admin/complaints",
+	"/admin/active_complaints",
 }
-
 
 /*
 	return if a method belongs to user or not

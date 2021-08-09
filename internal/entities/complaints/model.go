@@ -12,6 +12,7 @@ type Complaint struct {
 	Status        string
 	Remark        string
 	PaymentsId    string
+	RefundId	  string
 	Payments      payments.Payments
 }
 func (c *Complaint) TableName() string {
