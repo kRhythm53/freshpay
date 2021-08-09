@@ -7,29 +7,10 @@ import (
 	"github.com/freshpay/internal/entities/user_management/utilities"
 )
 
-func VerifyPhoneNumber(phoneNumber string) bool{
-	if phoneNumber=="1"{
-		return false
-	}
-	return true
-}
+
 //SignUp will be used to create a admin on signup
 func SignUp(admin *Detail) (err error){
-	phoneNumber :=admin.PhoneNumber
 
-	/*
-	   Make sure PhoneNumber doesn't exist
-	*/
-	var adminTemp Detail
-	err=GetAdminByPhoneNumber(&adminTemp,phoneNumber)
-	if err==nil{
-		err=errors.New("Phone Number is already registered")
-		return err
-	}
-	if !VerifyPhoneNumber(phoneNumber){
-		err=errors.New("OTP entered is wrong, Try again")
-		return err
-	}
 	admin.ID=utilities.CreateID(Prefix,14)
 
 	if err=config.DB.Create(admin).Error; err!=nil{

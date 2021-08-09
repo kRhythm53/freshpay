@@ -78,6 +78,7 @@ func GetUserID(searchID string) (err error,userID string) {
 }
 
 func GetPaymentType(payment *Payments) string{
+
 	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix){
 		if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix){
 			return constants.PaymentTypeWalletTransfer

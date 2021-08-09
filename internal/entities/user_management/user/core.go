@@ -11,30 +11,9 @@ import (
 )
 
 
-
-func VerifyPhoneNumber(phoneNumber string) bool{
-	if phoneNumber=="1"{
-		return false
-	}
-	return true
-}
 //SignUp will be used to create a user on signup
 func SignUp(user *Detail) (err error){
-	phoneNumber :=user.PhoneNumber
 
-	/*
-	    Make sure PhoneNumber doesn't exist
-	 */
-	var userTemp Detail
-	err=GetUserByPhoneNumber(&userTemp,phoneNumber)
-	if err==nil{
-		err=errors.New("Phone Number is already registered")
-		return err
-	}
-	if !VerifyPhoneNumber(phoneNumber){
-		err=errors.New("OTP entered is wrong, Try again")
-		return err
-	}
 	user.ID=utilities.CreateID(Prefix,14)
 
 	if err=config.DB.Create(user).Error; err!=nil{
