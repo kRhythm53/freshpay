@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"github.com/freshpay/internal/entities/admin/admin_session"
 	"github.com/freshpay/internal/entities/user_management/session"
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ var userPath=[]string{
 	"/users/bankaccounts",
 	"/users/beneficiary",
 	"/payments",
-	"/payments/:payment_id",
+	"/payments/:payments_id",
 	"/campaigns/",
 	"/campaigns/:campaign_id",
 }
@@ -50,6 +51,7 @@ func isAdminPath(Path string) bool{
 
 
 func Authenticate(c *gin.Context){
+	fmt.Println("full path :",c.FullPath())
 	if c.FullPath() =="/users/signin" || c.FullPath()=="/users/signup" ||
 		c.FullPath() =="/admin/signin" || c.FullPath()=="/admin/signup"  {
 			c.Next()
@@ -62,6 +64,7 @@ func Authenticate(c *gin.Context){
 	if sender==session.Prefix{
 		if !isUserPath(c.FullPath()){
 			c.AbortWithError(400, errors.New("acess denied"))
+			return
 		}
 		var Session session.Detail
 		err1:=session.GetSessionById(&Session, sessionId)

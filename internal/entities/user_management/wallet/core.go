@@ -39,3 +39,13 @@ func GetWalletBalanceByUserId(wallet *Detail,userId string)(err error){
 	wallet.ID=""
 	return nil
 }
+
+func UpdateWalletBalance(walletID string,amount int64){
+	var Wallet Detail
+	err := GetWalletById(&Wallet, walletID)
+	if err != nil {
+		return
+	}
+	Wallet.Balance+=int(amount)
+	config.DB.Table("wallet").Save(Wallet)
+}

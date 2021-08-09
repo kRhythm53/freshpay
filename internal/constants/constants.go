@@ -1,7 +1,7 @@
 package constants
 
 const (
-	IDPrefix                  = "paymt"
+	PaymentPrefix             = "paymt"
 	WalletPrefix              = "wal"
 	BankPrefix                = "bnk"
 	TransactionPrefix         = "trans"

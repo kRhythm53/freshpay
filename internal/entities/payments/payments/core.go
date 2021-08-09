@@ -3,7 +3,6 @@ package payments
 import (
 	"errors"
 	"fmt"
-	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/campaigns"
 	"github.com/freshpay/internal/entities/payments/utilities"
@@ -21,7 +20,7 @@ var ResultsPaymentsChannel = make(chan *Payments, 1000)
 func AddPayments(payment *Payments) (err error) {
 	payment.Type = GetPaymentType(payment)
 	payment.Status = "processing"
-	payment.ID = GenerateID()
+	payment.ID = utilities.RandomString(14, constants.PaymentPrefix)
 	err=ValidityCheck(payment)
 	if err!=nil{
 		return err
@@ -54,8 +53,15 @@ func GetPaymentsByTime(payments *[]Payments, from string, to string, userID stri
 }
 
 func UpdatePayment(payment *Payments) (err error) {
-	UpdateTransactionCount(payment)
-	if payment.Type != "Cashback" || payment.Type != "Refund" {
+	id, err := GetUserIdFromFundId(payment.SourceId)
+	if err != nil {
+		return err
+	}
+	err = user.UpdateTransactionCount(id)
+	if err != nil {
+		return err
+	}
+	if payment.Type != "Cashback" && payment.Type != "Refund" {
 		err2 := InitiateCashback(payment)
 		if err2 != nil {
 			return err2
@@ -125,10 +131,6 @@ func ValidityCheck(payment *Payments) (err error) {
 	return nil
 }
 
-func GenerateID() string {
-	return utilities.RandomString(14, constants.IDPrefix)
-}
-
 func InitiateRefund(paymentID string, UserID string) (RefundID string, err error) {
 	var RefundPayment Payments
 
@@ -144,7 +146,7 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 		return "", err3
 	}
 
-	RefundPayment.ID = GenerateID()
+	RefundPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
 	RefundPayment.Amount = payment.Amount
 	RefundPayment.Currency = "INR"
 	RefundPayment.SourceId = "wal_Mh5gqYDWlNBYWq"
@@ -154,8 +156,6 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 	InputPaymentsChannel <- &RefundPayment
 	return RefundPayment.ID, nil
 }
-
-//payments.InitiateRefund(Complaint.PaymentsId,Complaint.UserId)
 
 func InitiateCashback(payment *Payments) (err error) {
 	var userID string
@@ -178,7 +178,7 @@ func InitiateCashback(payment *Payments) (err error) {
 	if Cashback > 0 {
 		fmt.Println("initiating cashback :",Cashback)
 		var CashbackPayment Payments
-		CashbackPayment.ID = GenerateID()
+		CashbackPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
 		CashbackPayment.Amount = int64(Cashback)
 		CashbackPayment.Currency = "INR"
 		CashbackPayment.SourceId = "wal_Mh5gqYDWlNBYWq"
@@ -191,26 +191,22 @@ func InitiateCashback(payment *Payments) (err error) {
 	return nil
 }
 
-func UpdateTransactionCount(payment *Payments) (err error) {
+func GetUserIdFromFundId(FundId string)(string,error){
 	var userID string
-	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix) {
+	if strings.HasPrefix(FundId, constants.WalletPrefix) {
 		var Source wallet.Detail
-		err := wallet.GetWalletById(&Source, payment.SourceId)
+		err := wallet.GetWalletById(&Source, FundId)
 		if err != nil {
-			return err
+			return "",err
 		}
 		userID = Source.UserId
 	} else {
 		var Source bank.Detail
-		err := bank.GetBankById(&Source, payment.SourceId)
+		err := bank.GetBankById(&Source,FundId)
 		if err != nil {
-			return err
+			return "",err
 		}
 		userID = Source.UserId
 	}
-	var x user.Detail
-	user.GetUserById(&x,userID)
-	x.NumberOfTransactions=x.NumberOfTransactions+1
-	config.DB.Table("user").Save(&x)
-	return nil
+	return userID,nil
 }
