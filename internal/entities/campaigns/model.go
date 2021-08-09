@@ -1,9 +1,7 @@
 package campaigns
 
-import (
-	"gorm.io/gorm"
-	_ "gorm.io/gorm"
-)
+import "gorm.io/gorm"
+
 var ComplaintPrefix = "cmplt_"
 type Campaign struct {
 	gorm.Model

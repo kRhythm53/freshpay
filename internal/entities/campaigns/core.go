@@ -49,14 +49,14 @@ func Eligibility (payment *payments.Payments,userid string) int  {
 		return cashback
 	}
 	TransNum:= UserRow.NumberOfTransactions
-	var user [] Campaign
+	var users [] Campaign
 	Time:=payment.CreatedAt
 	Amount:=payment.Amount
-	err := config.DB.Table("campaign").Where("start_time > ? AND end_time < ? AND transaction_number = ?",Time,Time,TransNum).Find(&user).Error
+	err := config.DB.Table("campaign").Where("start_time > ? AND end_time < ? AND transaction_number = ?",Time,Time,TransNum).Find(&users).Error
 	if err != nil {
 		return cashback
 	} else {
-		for _,entry:=range user {
+		for _,entry:=range users {
 			if entry.IsActive {
                   percentage:=entry.PercentageRate
                   PercentageAmount:= (float64(percentage/100))*(float64(Amount))
