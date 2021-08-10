@@ -2,13 +2,29 @@ package middleware
 
 import (
 	"errors"
-	"fmt"
 	"github.com/freshpay/internal/entities/admin/admin_session"
 	"github.com/freshpay/internal/entities/user_management/session"
 	"github.com/gin-gonic/gin"
 	"strings"
 	"time"
 )
+var noSessionIdPath=[]string{
+	"/users/signup",
+	"/users/signin",
+	"/admin/signup",
+	"/admin/signin",
+	"/users/signup/otp/verification",
+	"/admin/signup/otp/verification",
+}
+
+func isNoSessionIdPath(Path string) bool{
+	for _,path:=range noSessionIdPath{
+		if Path==path{
+			return true
+		}
+	}
+	return false
+}
 var userPath=[]string{
 	"/users/bankaccount",
 	"/users/bankaccounts",
@@ -54,13 +70,10 @@ func isAdminPath(Path string) bool{
 
 
 func Authenticate(c *gin.Context){
-	fmt.Println("full path :",c.FullPath())
-	if c.FullPath() =="/users/signin" || c.FullPath()=="/users/signup" ||
-		c.FullPath() =="/admin/signin" || c.FullPath()=="/admin/signup"  {
+	if isNoSessionIdPath(c.FullPath()){
 		c.Next()
 		return
 	}
-
 	sessionId:= c.Request.Header["Session_id"][0]
 	//if sessionId belongs to user
 	sender:=strings.Split(sessionId,"_")[0]
