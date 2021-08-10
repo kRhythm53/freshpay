@@ -1,6 +1,7 @@
 package user_management
 
 import (
+	"fmt"
 	"github.com/freshpay/internal/entities/user_management/session"
 	"github.com/freshpay/internal/entities/user_management/user"
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,7 @@ func SignUp(c *gin.Context) {
 func LoginByPassword(c *gin.Context){
 	var loginInfo user.Detail
 	c.BindJSON(&loginInfo)
+	fmt.Println(loginInfo)
 	var Session session.Detail
 	err:=user.LoginByPassword(loginInfo.PhoneNumber,loginInfo.Password,&Session)
 	if err!=nil{
