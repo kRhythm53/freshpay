@@ -2,7 +2,9 @@ package admin
 
 import (
 	"errors"
+	"fmt"
 	"github.com/freshpay/internal/config"
+	"github.com/freshpay/internal/entities/OTP"
 	"github.com/freshpay/internal/entities/admin/admin_session"
 	"github.com/freshpay/internal/entities/user_management/utilities"
 )
@@ -10,7 +12,26 @@ import (
 
 //SignUp will be used to create a admin on signup
 func SignUp(admin *Detail) (err error){
+	phoneNumber :=admin.PhoneNumber
 
+	/*
+	   Make sure PhoneNumber doesn't exist
+	*/
+	var adminTemp Detail
+	err=GetAdminByPhoneNumber(&adminTemp,phoneNumber)
+	if err==nil && adminTemp.IsVerified{
+		err=errors.New("Phone Number is already registered")
+		return err
+	} else if err==nil{
+		err=DeleteAdmin(&adminTemp)
+		if err!=nil{
+			return err
+		}
+	}
+	err= OTP.SendOTP(phoneNumber)
+	if err!=nil{
+		return err
+	}
 	admin.ID=utilities.CreateID(Prefix,14)
 
 	if err=config.DB.Create(admin).Error; err!=nil{
@@ -44,7 +65,16 @@ func GetAdminByPhoneNumber(admin *Detail, phoneNumber string)(err error){
 func LoginByPassword(phoneNumber string, password string, Session *admin_session.Detail)(err error) {
 	var admin Detail
 	err = GetAdminByPhoneNumber(&admin, phoneNumber)
+
 	if err == nil {
+		if !admin.IsVerified{
+			err=errors.New("Phone Number is not verified, please signup again")
+			fmt.Println(err)
+			/*
+			   need to remove this line
+			*/
+			//return err
+		}
 		if admin.Password != password {
 			err = errors.New("Password is Wrong")
 		} else {
@@ -52,5 +82,36 @@ func LoginByPassword(phoneNumber string, password string, Session *admin_session
 			err = admin_session.CreateSession(Session)
 		}
 	}
+	fmt.Println("error : ", err)
+	return err
+}
+
+
+
+
+//set verified admin by phone number
+func SetVerifiedAdminByPhoneNumber(phoneNumber string)(err error){
+	var admin Detail
+	err = GetAdminByPhoneNumber(&admin, phoneNumber)
+	if err==nil{
+		admin.IsVerified=true
+		err=UpdateAdmin(&admin)
+	}
+	return err
+}
+
+//update the admin
+func UpdateAdmin(admin *Detail)(err error){
+	err=config.DB.Save(admin).Error
+	if err!=nil{
+		return err
+	}
+	return nil
+}
+
+
+//Delete a admin
+func DeleteAdmin(admin *Detail)(err error){
+	err=config.DB.Where("id = ?",admin.ID).Delete(admin).Error
 	return err
 }

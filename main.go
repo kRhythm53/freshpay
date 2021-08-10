@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/admin"
+	"github.com/freshpay/internal/entities/admin/admin_session"
 	"github.com/freshpay/internal/entities/campaigns"
 	"github.com/freshpay/internal/entities/complaints"
 	payments2 "github.com/freshpay/internal/entities/payments/payments"
@@ -34,7 +35,8 @@ func main() {
 	//defer config.DB.Close()
 	config.DB.AutoMigrate(&payments2.Payments{},&transactions.Transactions{})
 	config.DB.AutoMigrate(&campaigns.Campaign{},&complaints.Complaint{})
-	config.DB.AutoMigrate(&admin.Detail{},&bank.Detail{},&user.Detail{},&beneficiary.Detail{},&session.Detail{},&wallet.Detail{})
+	config.DB.AutoMigrate(&admin.Detail{},&bank.Detail{},&user.Detail{},&beneficiary.Detail{},&session.Detail{},
+	&wallet.Detail{},&admin_session.Detail{})
 	r:=routes.SetupRouter()
 	////running
 	r.Run()

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/freshpay/internal/controllers/admin_management"
+	"github.com/freshpay/internal/controllers/otp_verification"
 	"github.com/freshpay/internal/controllers/payments"
 	"github.com/freshpay/internal/controllers/user_management"
 	"github.com/freshpay/middleware"
@@ -22,6 +23,7 @@ func SetupRouter() *gin.Engine {
 	grp2:= r.Group("/users")
 	{
 		grp2.POST("signup",user_management.SignUp)
+		grp2.POST("signup/otp/verification",otp_verification.VerifyOTPUser)
 		grp2.POST("signin",user_management.LoginByPassword)
 		grp2.POST("bankaccount",user_management.AddBankAccount)
 		grp2.GET("bankaccounts",user_management.GetAllBankAccountByUserId)
@@ -34,6 +36,8 @@ func SetupRouter() *gin.Engine {
 	grp3:= r.Group("/admin")
 	{
 		grp3.POST("signup",admin_management.SignUp)
+		grp3.POST("signup/otp/verification",otp_verification.VerifyOTPAdmin)
+		grp3.POST("signin",admin_management.LoginByPassword)
 	}
 	return r
 }

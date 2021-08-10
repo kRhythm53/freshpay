@@ -5,10 +5,11 @@ import "gorm.io/gorm"
 type Detail struct {
 	gorm.Model
 	ID          string `gorm:"type:varchar(20)"`
-	Name        string `json:"name"`
-	PhoneNumber string `json:"phone_number"`
-	Password    string `json:"password"`
-	Email       string `json:"email"`
+	Name        string
+	PhoneNumber string
+	Password    string
+	Email       string
+	IsVerified bool `gorm:"default:false"`
 }
 
 const (

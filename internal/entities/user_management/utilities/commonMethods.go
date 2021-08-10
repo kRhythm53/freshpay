@@ -1,4 +1,5 @@
 package utilities
+
 import (
 	"math/rand"
 	"time"
@@ -13,3 +14,5 @@ func CreateID(prefix string,length int) string{
 	}
 	return prefix+"_"+string(b)
 }
+
+
