@@ -13,7 +13,11 @@ var userPath=[]string{
 	"/users/bankaccount",
 	"/users/bankaccounts",
 	"/users/beneficiary",
-	"/users/complaint",
+	"/payments",
+	"/payments/:payments_id",
+	"/payments/",
+	"/campaigns/",
+	"/campaigns/:campaign_id",
 }
 
 var adminPath=[]string{
@@ -50,23 +54,11 @@ func isAdminPath(Path string) bool{
 
 
 func Authenticate(c *gin.Context){
-	fmt.Println("c.Path: ",c.FullPath())
-	if c.FullPath()=="/users/signup" || c.FullPath()=="/admin/signup"{
-		fmt.Println("Inside")
-		/*err:= phonenumber_verification.VerifyPhoneNumber(c)
-		if err!=nil{
-			c.AbortWithError(400,err)
-			return
-		} else{
-			c.Next()
-			return
-		}*/
+	fmt.Println("full path :",c.FullPath())
+	if c.FullPath() =="/users/signin" || c.FullPath()=="/users/signup" ||
+		c.FullPath() =="/admin/signin" || c.FullPath()=="/admin/signup"  {
 		c.Next()
 		return
-	}
-	if c.FullPath() =="/users/signin"  || c.FullPath() =="/admin/signin"  {
-			c.Next()
-			return
 	}
 
 	sessionId:= c.Request.Header["Session_id"][0]
@@ -89,10 +81,8 @@ func Authenticate(c *gin.Context){
 		userId:=Session.UserId
 		c.Set("userId",userId)
 	} else if sender==admin_session.Prefix{
-		println(c.FullPath())
 		if !isAdminPath(c.FullPath()){
 			c.AbortWithError(400, errors.New("acess denied"))
-			return
 		}
 		var Session admin_session.Detail
 		err1:=admin_session.GetSessionById(&Session, sessionId)
