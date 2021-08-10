@@ -79,14 +79,3 @@ func LoginByPassword(phoneNumber string, password string, Session *session.Detai
 	}
 	return err
 }
-
-func UpdateTransactionCount(userID string)(err error){
-	var User Detail
-	err = GetUserById(&User, userID)
-	if err != nil {
-		return
-	}
-	User.NumberOfTransactions= User.NumberOfTransactions+1
-	config.DB.Table("user").Save(&User)
-	return nil
-}
