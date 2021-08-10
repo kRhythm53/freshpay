@@ -1,10 +1,11 @@
 package user
 
-import "gorm.io/gorm"
+import (
+	"github.com/freshpay/internal/base"
+)
 
 type Detail struct {
-	gorm.Model
-	ID          string `gorm:"type:varchar(20)"`
+	base.Model
 	Name        string
 	PhoneNumber string
 	Password    string

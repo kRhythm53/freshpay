@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/freshpay/internal/entities/admin/admin_session"
 	"github.com/freshpay/internal/entities/user_management/session"
-	"github.com/freshpay/middleware/phonenumber_verification"
 	"github.com/gin-gonic/gin"
 	"strings"
 	"time"
@@ -14,10 +13,13 @@ var userPath=[]string{
 	"/users/bankaccount",
 	"/users/bankaccounts",
 	"/users/beneficiary",
+	"/users/complaint",
 }
 
 var adminPath=[]string{
-
+	"/admin/complaint/:complaint_id",
+	"/admin/complaints",
+	"/admin/active_complaints",
 }
 
 
@@ -51,14 +53,16 @@ func Authenticate(c *gin.Context){
 	fmt.Println("c.Path: ",c.FullPath())
 	if c.FullPath()=="/users/signup" || c.FullPath()=="/admin/signup"{
 		fmt.Println("Inside")
-		err:= phonenumber_verification.VerifyPhoneNumber(c)
+		/*err:= phonenumber_verification.VerifyPhoneNumber(c)
 		if err!=nil{
 			c.AbortWithError(400,err)
 			return
 		} else{
 			c.Next()
 			return
-		}
+		}*/
+		c.Next()
+		return
 	}
 	if c.FullPath() =="/users/signin"  || c.FullPath() =="/admin/signin"  {
 			c.Next()
@@ -85,6 +89,7 @@ func Authenticate(c *gin.Context){
 		userId:=Session.UserId
 		c.Set("userId",userId)
 	} else if sender==admin_session.Prefix{
+		println(c.FullPath())
 		if !isAdminPath(c.FullPath()){
 			c.AbortWithError(400, errors.New("acess denied"))
 			return

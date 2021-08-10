@@ -38,6 +38,7 @@ func GetUserById(user *Detail, id string)(err error){
 
 //GetUserByPhoneNumber will get the user details by phone number
 func GetUserByPhoneNumber(user *Detail, phoneNumber string)(err error){
+	print("ad")
 	if err = config.DB.Where("phone_number = ?", phoneNumber).First(user).Error; err != nil {
 		return err
 	}

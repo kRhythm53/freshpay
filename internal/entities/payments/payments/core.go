@@ -5,6 +5,7 @@ import (
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/payments/utilities"
+	"github.com/freshpay/internal/entities/user_management/wallet"
 	"strconv"
 	"strings"
 	"time"
@@ -100,5 +101,31 @@ func ValidityCheck(payment *Payments) (err error ){
 }
 
 func GenerateID() string{
-	return utilities.RandomString(14,constants.IDPrefix)
+	return utilities.RandomString(14,constants.PaymentPrefix)
+}
+
+func InitiateRefund(paymentID string, UserID string) (RefundID string, err error) {
+	var RefundPayment Payments
+
+	var payment *Payments
+	err2 := GetPaymentByID(payment, paymentID)
+	if err2 != nil {
+		return "", err2
+	}
+
+	var RefundWallet wallet.Detail
+	err3 := wallet.GetWalletByUserId(&RefundWallet, UserID)
+	if err3 != nil {
+		return "", err3
+	}
+
+	RefundPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
+	RefundPayment.Amount = payment.Amount
+	RefundPayment.Currency = "INR"
+	RefundPayment.SourceId = "wal_Mh5gqYDWlNBYWq"
+	RefundPayment.DestinationId = RefundWallet.ID
+	RefundPayment.Type = "Refund"
+	RefundPayment.Status = "processing"
+	InputPaymentsChannel <- &RefundPayment
+	return RefundPayment.ID, nil
 }

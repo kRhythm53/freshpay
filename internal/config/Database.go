@@ -21,8 +21,9 @@ func BuildDBConfig() *DBConfig {
 		Port:     3306,
 		User:     "root",
 		//Password: "sqlPass123",
-		Password: "12345678",
-		DBName: "freshpayDB",
+		//Password: "12345678",
+		Password: "Terminate@1225",
+		DBName: "first_go",
 	}
 	return &dbConfig
 }
