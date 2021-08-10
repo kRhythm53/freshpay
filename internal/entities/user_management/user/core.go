@@ -25,9 +25,9 @@ func SignUp(user *Detail) (err error) {
 	   Make sure PhoneNumber doesn't exist
 	*/
 	var userTemp Detail
-	err = GetUserByPhoneNumber(&userTemp, phoneNumber)
-	if err == nil {
-		err = errors.New("Phone Number is already registered")
+	err=GetUserByPhoneNumber(&userTemp,phoneNumber)
+	if err==nil {
+		err=errors.New("Phone Number is already registered")
 		return err
 	}
 	if !VerifyPhoneNumber(phoneNumber) {
