@@ -47,19 +47,26 @@ func Eligibility (Time int64,Amount int64,userid string) int  {
 	}
 	TransNum:= UserRow.NumberOfTransactions
 	var users [] Campaign
-	//Time:=payment.CreatedAt
-	//Amount:=payment.Amount
-	err := config.DB.Table("campaign").Where("start_time <= ? AND end_time >= ? AND transaction_number = ?",Time,Time,TransNum).Find(&users).Error
+	err := config.DB.Table("campaign").Where("start_time > ? AND end_time < ? AND transaction_number = ?",Time,Time,TransNum).Find(&users).Error
 	if err != nil {
 		return cashback
 	} else {
-		for _,entry:=range users {
-			if entry.IsActive {
+		index:=-1
+		for i,entry:=range users {
+			if entry.IsActive && entry.Count  > 0 {
 				percentage:=entry.PercentageRate
-				PercentageAmount:= (float64(percentage))*(float64(Amount))/100
+				PercentageAmount:= (float64(percentage/100))*(float64(Amount))
 				cashbackAmount:= math.Min(PercentageAmount, float64(entry.MaxCashback))
-				cashback= int(math.Max(float64(cashback), cashbackAmount))
+				if cashbackAmount > float64(cashback) {
+					cashback = int(math.Max(float64(cashback), cashbackAmount))
+					index=i
+				}
 			}
+		}
+		if index!=-1 {
+			issued:= &users[index]
+			issued.Count -= 1
+			config.DB.Table("campaign").Save(issued)
 		}
 	}
 	return cashback
