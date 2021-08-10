@@ -4,15 +4,17 @@ import (
 	"github.com/freshpay/internal/base"
 	_ "gorm.io/gorm"
 )
+
 type Complaint struct {
 	base.Model
-	ComplaintType string
-	Status        string
-	Remark        string
-	PaymentsId    string
-	UserId        string
-	RefundId      string
+	ComplaintType string `json:"complaint_type"`
+	Status        string `json:"status"`
+	Remark        string `json:"remark"`
+	PaymentsId    string `json:"payments_id"`
+	UserId        string `json:"user_id"`
+	RefundId      string `json:"refund_id"`
 }
+
 func (c *Complaint) TableName() string {
 	return "complaint"
 }

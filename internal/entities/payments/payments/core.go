@@ -137,8 +137,8 @@ func ValidityCheck(payment *Payments) (err error) {
 
 func InitiateRefund(paymentID string, UserID string) (RefundID string, err error) {
 	var RefundPayment Payments
-	var payment *Payments
-	err2 := GetPaymentByID(payment, paymentID)
+	var payment Payments
+	err2 := GetPaymentByID(&payment, paymentID)
 	if err2 != nil {
 		return "", err2
 	}
@@ -152,11 +152,15 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 	RefundPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
 	RefundPayment.Amount = payment.Amount
 	RefundPayment.Currency = "INR"
-	RefundPayment.SourceId = "wal_Mh5gqYDWlNBYWq"
+	RefundPayment.SourceId = "wal_LsEnKl91HI54Nb"
 	RefundPayment.DestinationId = RefundWallet.ID
 	RefundPayment.Type = "Refund"
 	RefundPayment.Status = "processing"
 	InputPaymentsChannel <- &RefundPayment
+	err4:=AddPaymentToDB(&RefundPayment)
+	if err4!=nil{
+		return "",err4
+	}
 	return RefundPayment.ID, nil
 }
 
@@ -179,12 +183,11 @@ func InitiateCashback(payment *Payments) (err error) {
 	}
 	Cashback := campaigns.Eligibility(payment.CreatedAt, payment.Amount, userID)
 	if Cashback > 0 {
-		fmt.Println("initiating cashback :", Cashback)
 		var CashbackPayment Payments
 		CashbackPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
 		CashbackPayment.Amount = int64(Cashback)
 		CashbackPayment.Currency = "INR"
-		CashbackPayment.SourceId = "wal_Mh5gqYDWlNBYWq"
+		CashbackPayment.SourceId = "wal_LsEnKl91HI54Nb"
 		CashbackPayment.DestinationId = payment.SourceId
 		CashbackPayment.Type = "Cashback"
 		CashbackPayment.Status = "processing"

@@ -1,9 +1,13 @@
 package complaints
 
-import "github.com/freshpay/internal/config"
+import (
+	"fmt"
+	"github.com/freshpay/internal/config"
+)
 
 func AddComplaintToDB(Complaint *Complaint) (err error){
 	if err := config.DB.Create(Complaint).Error; err != nil {
+		fmt.Println("found error")
 		return err
 	}
 	return nil

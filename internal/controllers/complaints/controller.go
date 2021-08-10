@@ -27,7 +27,7 @@ func CreateComplaint(c *gin.Context) {
 func UpdateComplaintById(c *gin.Context) {
 	var Complaint complaints.Complaint
 	id := c.Params.ByName("complaint_id")
-	refund := c.GetString("refund")
+	refund := c.Query("refund")
 	println("asdf")
 	println(id)
 	println(refund)
