@@ -51,7 +51,7 @@ func GetPaymentsByTime(payments *[]Payments, from string, to string, Transaction
 		endTime, err = strconv.ParseInt(to, 10, 64)
 	}
 	var Wallet wallet.Detail
-	wallet.GetWalletByUserId(&Wallet,userID)
+	wallet.GetWalletByUserId(&Wallet, userID)
 
 	return GetPaymentByTimeFromDB(payments, startTime, endTime, TransactionType, Wallet.ID)
 }
@@ -215,13 +215,13 @@ func GetUserIdFromFundId(FundId string) (string, error) {
 	return userID, nil
 }
 
-func UpdateTransactionCount(userID string)(err error){
+func UpdateTransactionCount(userID string) (err error) {
 	var User user.Detail
 	err = user.GetUserById(&User, userID)
 	if err != nil {
 		return
 	}
-	User.NumberOfTransactions= User.NumberOfTransactions+1
+	User.NumberOfTransactions = User.NumberOfTransactions + 1
 	config.DB.Table("user").Save(&User)
 	return nil
 }

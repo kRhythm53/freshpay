@@ -9,7 +9,8 @@ import (
 	"strings"
 	"time"
 )
-var userPath=[]string{
+
+var userPath = []string{
 	"/users/bankaccount",
 	"/users/bankaccounts",
 	"/users/beneficiary",
@@ -20,17 +21,16 @@ var userPath=[]string{
 	"/campaigns/:campaign_id",
 }
 
-var adminPath=[]string{
+var adminPath = []string{
 
 }
-
 
 /*
 	return if a method belongs to user or not
 */
-func isUserPath(Path string) bool{
-	for _,path:=range userPath{
-		if Path==path{
+func isUserPath(Path string) bool {
+	for _, path := range userPath {
+		if Path == path {
 			return true
 		}
 	}
@@ -39,60 +39,58 @@ func isUserPath(Path string) bool{
 
 /*
 return if a method belongs to admin or not
- */
-func isAdminPath(Path string) bool{
-	for _,path:=range adminPath{
-		if Path==path{
+*/
+func isAdminPath(Path string) bool {
+	for _, path := range adminPath {
+		if Path == path {
 			return true
 		}
 	}
 	return false
 }
 
-
-
-func Authenticate(c *gin.Context){
-	fmt.Println("full path :",c.FullPath())
-	if c.FullPath() =="/users/signin" || c.FullPath()=="/users/signup" ||
-		c.FullPath() =="/admin/signin" || c.FullPath()=="/admin/signup"  {
-			c.Next()
-			return
+func Authenticate(c *gin.Context) {
+	fmt.Println("full path :", c.FullPath())
+	if c.FullPath() == "/users/signin" || c.FullPath() == "/users/signup" ||
+		c.FullPath() == "/admin/signin" || c.FullPath() == "/admin/signup" {
+		c.Next()
+		return
 	}
 
-	sessionId:= c.Request.Header["Session_id"][0]
+	sessionId := c.Request.Header["Session_id"][0]
 	//if sessionId belongs to user
-	sender:=strings.Split(sessionId,"_")[0]
-	if sender==session.Prefix{
-		if !isUserPath(c.FullPath()){
+	sender := strings.Split(sessionId, "_")[0]
+	if sender == session.Prefix {
+		if !isUserPath(c.FullPath()) {
 			c.AbortWithError(400, errors.New("acess denied"))
 			return
 		}
 		var Session session.Detail
-		err1:=session.GetSessionById(&Session, sessionId)
-		if err1!=nil{
+		err1 := session.GetSessionById(&Session, sessionId)
+		if err1 != nil {
 			c.AbortWithStatus(403)
 			return
-		} else if Session.ExpireTime < uint64(time.Now().Unix()){
-			c.AbortWithError(400,errors.New("Session has expired"))
+		} else if Session.ExpireTime < uint64(time.Now().Unix()) {
+			c.AbortWithError(400, errors.New("Session has expired"))
 			return
 		}
-		userId:=Session.UserId
-		c.Set("userId",userId)
-	} else if sender==admin_session.Prefix{
-		if !isAdminPath(c.FullPath()){
+		userId := Session.UserId
+		c.Set("userId", userId)
+	} else if sender == admin_session.Prefix {
+		if !isAdminPath(c.FullPath()) {
 			c.AbortWithError(400, errors.New("acess denied"))
 		}
 		var Session admin_session.Detail
-		err1:=admin_session.GetSessionById(&Session, sessionId)
-		if err1!=nil{
+		err1 := admin_session.GetSessionById(&Session, sessionId)
+		if err1 != nil {
 			c.AbortWithStatus(403)
 			return
-		} else if Session.ExpireTime < uint64(time.Now().Unix()){
-			c.AbortWithError(400,errors.New("Session has expired"))
+		} else if Session.ExpireTime < uint64(time.Now().Unix()) {
+			c.AbortWithError(400, errors.New("Session has expired"))
 			return
 		}
-		adminId:=Session.AdminId
-		c.Set("adminId",adminId)
+		adminId := Session.AdminId
+		c.Set("adminId", adminId)
 	}
 	c.Next()
 }

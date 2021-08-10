@@ -5,6 +5,7 @@ import (
 	"github.com/freshpay/internal/entities/payments/payments"
 	"github.com/freshpay/internal/entities/payments/utilities"
 	"github.com/freshpay/internal/entities/user_management/wallet"
+	"strings"
 	"time"
 )
 func InitiateTransaction(){
@@ -42,11 +43,15 @@ func AddTransactions(payment *payments.Payments,direction string) (err error) {
 	if direction=="to razorpay account"{
 		transaction.SourceId=payment.SourceId
 		transaction.DestinationId="wal_Mh5gqYDWlNBYWq"
-		wallet.UpdateWalletBalance(transaction.SourceId,-1*transaction.Amount)
+		if strings.HasPrefix(transaction.SourceId, constants.WalletPrefix){
+			wallet.UpdateWalletBalance(transaction.SourceId,-1*transaction.Amount)
+		}
 	}else{
 		transaction.SourceId="wal_Mh5gqYDWlNBYWq"
 		transaction.DestinationId=payment.DestinationId
-		wallet.UpdateWalletBalance(transaction.DestinationId,transaction.Amount)
+		if strings.HasPrefix(transaction.DestinationId, constants.WalletPrefix){
+			wallet.UpdateWalletBalance(transaction.DestinationId,transaction.Amount)
+		}
 	}
 	transaction.Type=payment.Type
 	transaction.Status="processed"
