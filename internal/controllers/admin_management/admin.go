@@ -11,6 +11,7 @@ package admin_management/*
 func SignUp(c *gin.Context) {
 	var Admin admin.Detail
 	c.BindJSON(&Admin)
+	println(c.BindJSON(&Admin))
 	err := admin.SignUp(&Admin)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest,err)
