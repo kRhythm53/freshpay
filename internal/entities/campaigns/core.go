@@ -1,6 +1,7 @@
 package campaigns
 
 import (
+	"fmt"
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/payments/utilities"
 	"github.com/freshpay/internal/entities/user_management/user"
@@ -46,20 +47,29 @@ func Eligibility (Time int64,Amount int64,userid string) int  {
 		return cashback
 	}
 	TransNum:= UserRow.NumberOfTransactions
-	var users [] Campaign
-	//Time:=payment.CreatedAt
-	//Amount:=payment.Amount
-	err := config.DB.Table("campaign").Where("start_time <= ? AND end_time >= ? AND transaction_number = ?",Time,Time,TransNum).Find(&users).Error
+	var ValidCampaigns [] Campaign
+	fmt.Println(Time,TransNum,Amount)
+	err := config.DB.Table("campaign").Where("start_time <= ? AND end_time >= ? AND transaction_number = ?",Time,Time,TransNum).Find(&ValidCampaigns).Error
 	if err != nil {
 		return cashback
 	} else {
-		for _,entry:=range users {
-			if entry.IsActive {
+		index:=-1
+		for i,entry:=range ValidCampaigns {
+			fmt.Println(entry.IsActive,entry.Count)
+			if entry.IsActive && entry.Count  > 0 {
 				percentage:=entry.PercentageRate
 				PercentageAmount:= (float64(percentage))*(float64(Amount))/100
 				cashbackAmount:= math.Min(PercentageAmount, float64(entry.MaxCashback))
-				cashback= int(math.Max(float64(cashback), cashbackAmount))
+				if cashbackAmount > float64(cashback) {
+					cashback = int(math.Max(float64(cashback), cashbackAmount))
+					index=i
+				}
 			}
+		}
+		if index!=-1 {
+			issued:= &ValidCampaigns[index]
+			issued.Count -= 1
+			config.DB.Table("campaign").Save(issued)
 		}
 	}
 	return cashback
