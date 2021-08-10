@@ -9,7 +9,7 @@ type Campaign struct {
 	CampaignType      string
 	StartTime         int64
 	EndTime           int64
-	Count             string
+	Count             int64
 	TransactionNumber string
 	IsActive          bool
 	MaxCashback       int64

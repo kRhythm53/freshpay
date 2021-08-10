@@ -1,4 +1,5 @@
 package campaigns
+
 import (
 	"fmt"
 	"github.com/freshpay/internal/entities/campaigns"
@@ -7,7 +8,7 @@ import (
 )
 
 func GetCampaign(c *gin.Context) {
-	var user [] campaigns.Campaign
+	var user []campaigns.Campaign
 	err := campaigns.GetAllCampaigns(&user)
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
@@ -44,10 +45,10 @@ func UpdateCampaign(c *gin.Context) {
 	id := c.Params.ByName("id")
 	err := campaigns.GetCampaignByID(&user, id)
 	if err != nil {
-		c.JSON(http.StatusNotFound,user)
+		c.JSON(http.StatusNotFound, user)
 	}
 	err = c.BindJSON(&user)
-	if err !=nil {
+	if err != nil {
 		return
 	}
 	err = campaigns.UpdateCampaign(&user)

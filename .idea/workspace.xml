@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="22c8e7e7-b92f-4366-800b-5fd9b6e4045b" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/controllers/campaign/controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/controllers/campaign/controller.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/campaigns/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/campaigns/core.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/entities/campaigns/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/campaigns/model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/routes/routes.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,5 +51,16 @@
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/entities/payments/payments/model.go</url>
+          <line>6</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
