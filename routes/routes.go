@@ -47,15 +47,12 @@ func SetupRouter() *gin.Engine {
 		grp5.POST("signup",admin_management.SignUp)
 		grp5.POST("signup/otp/verification",otp_verification.VerifyOTPAdmin)
 		grp5.POST("signin",admin_management.LoginByPassword)
-	}
-	grp4:= r.Group("/admin")
-	{
-		grp4.POST("signup",admin_management.SignUp)
-		grp4.POST("signin",admin_management.LoginByPassword)
-		grp4.GET("complaints",complaints.GetComplaints)
-		grp4.GET("active_complaints",complaints.GetActiveComplaints)
-		grp4.GET("complaint/:complaint_id",complaints.GetComplaintById)
-		grp4.PATCH("complaint/:complaint_id",complaints.UpdateComplaintById)
+		grp5.POST("signup",admin_management.SignUp)
+		grp5.POST("signin",admin_management.LoginByPassword)
+		grp5.GET("complaints",complaints.GetComplaints)
+		grp5.GET("active_complaints",complaints.GetActiveComplaints)
+		grp5.GET("complaint/:complaint_id",complaints.GetComplaintById)
+		grp5.PATCH("complaint/:complaint_id",complaints.UpdateComplaintById)
 	}
 	return r
 }
