@@ -2,7 +2,9 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"github.com/freshpay/internal/config"
+	"github.com/freshpay/internal/entities/OTP"
 	"github.com/freshpay/internal/entities/user_management/session"
 	"github.com/freshpay/internal/entities/user_management/utilities"
 	"github.com/freshpay/internal/entities/user_management/wallet"
@@ -27,16 +29,20 @@ func SignUp(user *Detail) (err error){
 	*/
 	var userTemp Detail
 	err=GetUserByPhoneNumber(&userTemp,phoneNumber)
-	if err==nil{
+	if err==nil && userTemp.IsVerified{
 		err=errors.New("Phone Number is already registered")
 		return err
+	} else if err==nil{
+		err=DeleteUser(&userTemp)
+		if err!=nil{
+			return err
+		}
 	}
-	if !VerifyPhoneNumber(phoneNumber){
-		err=errors.New("OTP entered is wrong, Try again")
+	err= OTP.SendOTP(phoneNumber)
+	if err!=nil{
 		return err
 	}
 	user.ID=utilities.CreateID(Prefix,14)
-
 	if err=config.DB.Create(user).Error; err!=nil{
 		return err
 	}
@@ -65,11 +71,34 @@ func GetUserByPhoneNumber(user *Detail, phoneNumber string)(err error){
 	return nil
 }
 
+
+//update the user
+func UpdateUser(user *Detail)(err error){
+	err=config.DB.Save(user).Error
+	if err!=nil{
+		return err
+	}
+	return nil
+}
+
+
+//Delete a user
+func DeleteUser(user *Detail)(err error){
+	err=config.DB.Where("id = ?",user.ID).Delete(user).Error
+	return err
+}
 //Login will login the user and will create a session
 func LoginByPassword(phoneNumber string, password string, Session *session.Detail)(err error) {
 	var user Detail
 	err = GetUserByPhoneNumber(&user, phoneNumber)
 	if err == nil {
+		if !user.IsVerified{
+			err=errors.New("Phone Number is not verified, please signup again")
+			/*
+			   need to remove this line
+			*/
+			//return err
+		}
 		if user.Password != password {
 			err = errors.New("Password is Wrong")
 		} else {
@@ -80,13 +109,14 @@ func LoginByPassword(phoneNumber string, password string, Session *session.Detai
 	return err
 }
 
-func UpdateTransactionCount(userID string)(err error){
-	var User Detail
-	err = GetUserById(&User, userID)
-	if err != nil {
-		return
+//set verified user by phone number
+func SetVerifiedUserByPhoneNumber(phoneNumber string)(err error){
+	var user Detail
+	err = GetUserByPhoneNumber(&user, phoneNumber)
+	if err==nil{
+		user.IsVerified=true
+		err=UpdateUser(&user)
 	}
-	User.NumberOfTransactions= User.NumberOfTransactions+1
-	config.DB.Table("user").Save(&User)
-	return nil
+	fmt.Println(user)
+	return err
 }
