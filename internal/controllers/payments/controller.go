@@ -12,10 +12,10 @@ func AddPayments(c *gin.Context) {
 	if err != nil {
 		return
 	}
-
-	err2 := payments.AddPayments(&payment)
+	userId :=c.GetString("userId")
+	err2 := payments.AddPayments(&payment,userId)
 	if err2 != nil {
-		c.String(http.StatusNotFound, "Payment failed")
+		c.String(http.StatusBadRequest, err2.Error())
 	} else {
 		c.JSON(http.StatusOK, payment)
 	}
@@ -26,7 +26,7 @@ func GetPaymentByID(c *gin.Context) {
 	id := c.Params.ByName("payments_id")
 	err := payments.GetPaymentByID(&payment, id)
 	if err != nil {
-		c.String(http.StatusNotFound, "Record not found")
+		c.String(http.StatusBadRequest, err.Error())
 	} else {
 		c.JSON(http.StatusOK, payment)
 	}
@@ -38,9 +38,9 @@ func GetPaymentsByTime(c *gin.Context) {
 	to := c.Query("to")
 	TransactionType := c.Query("type")
 	userId := c.GetString("userId")
-	err2 := payments.GetPaymentsByTime(&payment, from, to, TransactionType, userId)
-	if err2 != nil {
-		c.String(http.StatusNotFound, "Request failed.")
+	err := payments.GetPaymentsByTime(&payment, from, to, TransactionType, userId)
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
 	} else {
 		c.JSON(http.StatusOK, payment)
 	}

@@ -1,7 +1,6 @@
 package campaigns
 
 import (
-	"fmt"
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/payments/utilities"
 	"github.com/freshpay/internal/entities/user_management/user"
@@ -48,14 +47,12 @@ func Eligibility (Time int64,Amount int64,userid string) int  {
 	}
 	TransNum:= UserRow.NumberOfTransactions
 	var ValidCampaigns [] Campaign
-	fmt.Println(Time,TransNum,Amount)
 	err := config.DB.Table("campaign").Where("start_time <= ? AND end_time >= ? AND transaction_number = ?",Time,Time,TransNum).Find(&ValidCampaigns).Error
 	if err != nil {
 		return cashback
 	} else {
 		index:=-1
 		for i,entry:=range ValidCampaigns {
-			fmt.Println(entry.IsActive,entry.Count)
 			if entry.IsActive && entry.Count  > 0 {
 				percentage:=entry.PercentageRate
 				PercentageAmount:= (float64(percentage))*(float64(Amount))/100
