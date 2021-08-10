@@ -14,7 +14,6 @@ func InitiateTransaction(){
 		case payment:=<-payments.InputPaymentsChannel:
 			var err,err2 error
 			if payment.Type=="Cashback" || payment.Type=="Refund"{
-				//fmt.Println("initiating CB")
 				err=AddTransactions(payment,"from razorpay account")
 				if err != nil {
 					payment.Status="failed"
@@ -42,12 +41,12 @@ func AddTransactions(payment *payments.Payments,direction string) (err error) {
 	transaction.Currency=payment.Currency
 	if direction=="to razorpay account"{
 		transaction.SourceId=payment.SourceId
-		transaction.DestinationId="wal_Mh5gqYDWlNBYWq"
+		transaction.DestinationId=constants.RzpWalletID
 		if strings.HasPrefix(transaction.SourceId, constants.WalletPrefix){
 			wallet.UpdateWalletBalance(transaction.SourceId,-1*transaction.Amount)
 		}
 	}else{
-		transaction.SourceId="wal_Mh5gqYDWlNBYWq"
+		transaction.SourceId=constants.RzpWalletID
 		transaction.DestinationId=payment.DestinationId
 		if strings.HasPrefix(transaction.DestinationId, constants.WalletPrefix){
 			wallet.UpdateWalletBalance(transaction.DestinationId,transaction.Amount)
@@ -58,8 +57,6 @@ func AddTransactions(payment *payments.Payments,direction string) (err error) {
 	transaction.PaymentsId=payment.ID
 	transaction.CreatedAt=time.Now().Unix()
 	transaction.UpdatedAt=time.Now().Unix()
-	//fmt.Println("transaction : ",transaction)
-	//fmt.Println("payment:",*payment)
 	return AddTransactionToDB(transaction)
 }
 

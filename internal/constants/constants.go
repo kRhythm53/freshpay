@@ -9,3 +9,7 @@ const (
 	PaymentTypeBankWithdrawal = "bank withdrawal"
 	PaymentTypeAddToWallet    = "add to wallet"
 )
+
+var(
+	RzpWalletID string
+)

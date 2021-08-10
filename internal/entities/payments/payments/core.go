@@ -152,7 +152,7 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 	RefundPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
 	RefundPayment.Amount = payment.Amount
 	RefundPayment.Currency = "INR"
-	RefundPayment.SourceId = "wal_LsEnKl91HI54Nb"
+	RefundPayment.SourceId = constants.RzpWalletID
 	RefundPayment.DestinationId = RefundWallet.ID
 	RefundPayment.Type = "Refund"
 	RefundPayment.Status = "processing"
@@ -187,7 +187,7 @@ func InitiateCashback(payment *Payments) (err error) {
 		CashbackPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
 		CashbackPayment.Amount = int64(Cashback)
 		CashbackPayment.Currency = "INR"
-		CashbackPayment.SourceId = "wal_LsEnKl91HI54Nb"
+		CashbackPayment.SourceId = constants.RzpWalletID
 		CashbackPayment.DestinationId = payment.SourceId
 		CashbackPayment.Type = "Cashback"
 		CashbackPayment.Status = "processing"
@@ -225,5 +225,24 @@ func UpdateTransactionCount(userID string) (err error) {
 	}
 	User.NumberOfTransactions = User.NumberOfTransactions + 1
 	config.DB.Table("user").Save(&User)
+	return nil
+}
+
+func CreateRzpAccount()(err error){
+	var RZP user.Detail
+	RZP.Name="Razorpay Central Account"
+	RZP.Password="Razorpay123"
+	RZP.PhoneNumber="1234567890"
+	err = user.SignUp(&RZP)
+	if err != nil {
+		return err
+	}
+	var RZPWallet wallet.Detail
+	err = wallet.GetWalletByUserId(&RZPWallet, RZP.ID)
+	if err != nil {
+		return err
+	}
+	constants.RzpWalletID=RZPWallet.ID
+	wallet.UpdateWalletBalance(constants.RzpWalletID,10000000000)
 	return nil
 }

@@ -28,9 +28,6 @@ func UpdateComplaintById(c *gin.Context) {
 	var Complaint complaints.Complaint
 	id := c.Params.ByName("complaint_id")
 	refund := c.Query("refund")
-	println("asdf")
-	println(id)
-	println(refund)
 	err := complaints.GetComplaintByID(&Complaint, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, Complaint)
