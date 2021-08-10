@@ -15,6 +15,7 @@ var userPath=[]string{
 	"/users/beneficiary",
 	"/payments",
 	"/payments/:payments_id",
+	"/payments/",
 	"/campaigns/",
 	"/campaigns/:campaign_id",
 }
