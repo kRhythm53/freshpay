@@ -41,6 +41,7 @@ func SetupRouter() *gin.Engine {
 		grp3.GET("/:campaign_id",campaigns.GetCampaignByID)
 		grp3.PATCH("/:campaign_id",campaigns.UpdateCampaign)
 	}
+	
 	grp5:= r.Group("/admin")
 	{
 		grp5.POST("signup",admin_management.SignUp)
