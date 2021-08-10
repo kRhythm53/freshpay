@@ -36,6 +36,7 @@ var userPath = []string{
 	"/payments/",
 	"/campaigns/",
 	"/campaigns/:campaign_id",
+	"/users/complaint",
 }
 
 var adminPath = []string{
