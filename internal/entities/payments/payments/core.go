@@ -21,8 +21,8 @@ func AddPayments(payment *Payments) (err error) {
 	payment.Type = GetPaymentType(payment)
 	payment.Status = "processing"
 	payment.ID = utilities.RandomString(14, constants.PaymentPrefix)
-	err=ValidityCheck(payment)
-	if err!=nil{
+	err = ValidityCheck(payment)
+	if err != nil {
 		return err
 	}
 	InputPaymentsChannel <- payment
@@ -34,10 +34,10 @@ func GetPaymentByID(payment *Payments, id string) (err error) {
 	return GetPaymentByIDFromDB(payment, id)
 }
 
-func GetPaymentsByTime(payments *[]Payments, from string, to string, userID string) (err error) {
+func GetPaymentsByTime(payments *[]Payments, from string, to string, TransactionType string, userID string) (err error) {
 	var startTime, endTime int64
 	if from == "" {
-		startTime = time.Now().Unix()
+		startTime = 0
 	} else {
 		startTime, err = strconv.ParseInt(from, 10, 64)
 		if err != nil {
@@ -49,7 +49,10 @@ func GetPaymentsByTime(payments *[]Payments, from string, to string, userID stri
 	} else {
 		endTime, err = strconv.ParseInt(to, 10, 64)
 	}
-	return GetPaymentByTimeFromDB(payments, startTime, endTime, userID)
+	var Wallet wallet.Detail
+	wallet.GetWalletByUserId(&Wallet,userID)
+
+	return GetPaymentByTimeFromDB(payments, startTime, endTime, TransactionType, Wallet.ID)
 }
 
 func UpdatePayment(payment *Payments) (err error) {
@@ -176,7 +179,7 @@ func InitiateCashback(payment *Payments) (err error) {
 	}
 	Cashback := campaigns.Eligibility(payment.CreatedAt, payment.Amount, userID)
 	if Cashback > 0 {
-		fmt.Println("initiating cashback :",Cashback)
+		fmt.Println("initiating cashback :", Cashback)
 		var CashbackPayment Payments
 		CashbackPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
 		CashbackPayment.Amount = int64(Cashback)
@@ -191,22 +194,22 @@ func InitiateCashback(payment *Payments) (err error) {
 	return nil
 }
 
-func GetUserIdFromFundId(FundId string)(string,error){
+func GetUserIdFromFundId(FundId string) (string, error) {
 	var userID string
 	if strings.HasPrefix(FundId, constants.WalletPrefix) {
 		var Source wallet.Detail
 		err := wallet.GetWalletById(&Source, FundId)
 		if err != nil {
-			return "",err
+			return "", err
 		}
 		userID = Source.UserId
 	} else {
 		var Source bank.Detail
-		err := bank.GetBankById(&Source,FundId)
+		err := bank.GetBankById(&Source, FundId)
 		if err != nil {
-			return "",err
+			return "", err
 		}
 		userID = Source.UserId
 	}
-	return userID,nil
+	return userID, nil
 }

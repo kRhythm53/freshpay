@@ -1,7 +1,6 @@
 package payments
 
 import (
-	"fmt"
 	"github.com/freshpay/internal/config"
 )
 
@@ -18,10 +17,19 @@ func GetPaymentByIDFromDB(payment *Payments, id string) (err error) {
 	return nil
 }
 
-func GetPaymentByTimeFromDB(payments *[]Payments, startTime int64, endTime int64, userID string) (err error) {
-	fmt.Println(userID)
-	if err = config.DB.Table("payments").Where("created_at > ? AND created_at < ? ", startTime, endTime, userID).Find(payments).Error; err != nil {
-		return err
+func GetPaymentByTimeFromDB(payments *[]Payments, startTime int64, endTime int64, TransactionType string, WalletID string) (err error) {
+	if TransactionType == "credit" {
+		if err = config.DB.Table("payments").Where("created_at > ? AND created_at < ? AND source_id=", startTime, endTime, WalletID).Find(payments).Error; err != nil {
+			return err
+		}
+	} else if TransactionType == "debit"{
+		if err = config.DB.Table("payments").Where("created_at > ? AND created_at < ? AND destination_id=", startTime, endTime, WalletID).Find(payments).Error; err != nil {
+			return err
+		}
+	} else{
+		if err = config.DB.Table("payments").Where("created_at > ? AND created_at < ? ", startTime, endTime).Find(payments).Error; err != nil {
+			return err
+		}
 	}
 	return nil
 }

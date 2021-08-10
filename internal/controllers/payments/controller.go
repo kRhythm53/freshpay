@@ -36,8 +36,9 @@ func GetPaymentsByTime(c *gin.Context) {
 	var payment []payments.Payments
 	from := c.Query("from")
 	to := c.Query("to")
+	TransactionType := c.Query("type")
 	userId := c.GetString("userId")
-	err2 := payments.GetPaymentsByTime(&payment, from, to, userId)
+	err2 := payments.GetPaymentsByTime(&payment, from, to, TransactionType, userId)
 	if err2 != nil {
 		c.String(http.StatusNotFound, "Request failed.")
 	} else {
