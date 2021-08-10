@@ -120,4 +120,3 @@ func SetVerifiedUserByPhoneNumber(phoneNumber string)(err error){
 	fmt.Println(user)
 	return err
 }
-
