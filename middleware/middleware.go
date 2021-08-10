@@ -26,7 +26,6 @@ func isNoSessionIdPath(Path string) bool {
 	}
 	return false
 }
-
 var userPath = []string{
 	"/users/bankaccount",
 	"/users/bankaccounts",
@@ -60,20 +59,22 @@ func isUserPath(Path string) bool {
 return if a method belongs to admin or not
 */
 func isAdminPath(Path string) bool {
-	for _, path := range adminPath {
-		if Path == path {
+	for _,path := range adminPath {
+		if Path == path{
 			return true
 		}
 	}
 	return false
 }
 
+
+
 func Authenticate(c *gin.Context) {
-	if isNoSessionIdPath(c.FullPath()) {
+	if isNoSessionIdPath(c.FullPath()){
 		c.Next()
 		return
 	}
-	sessionId := c.Request.Header["Session_id"][0]
+	sessionId:= c.Request.Header["Session_id"][0]
 	//if sessionId belongs to user
 	sender := strings.Split(sessionId, "_")[0]
 	if sender == session.Prefix {
