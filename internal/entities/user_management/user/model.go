@@ -10,6 +10,7 @@ type Detail struct {
 	Password             string
 	Email                string
 	NumberOfTransactions int64 `gorm:"default:0"`
+	IsVerified bool `gorm:"default:false"`
 }
 
 const (

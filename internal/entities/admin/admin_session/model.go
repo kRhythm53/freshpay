@@ -10,8 +10,8 @@ type Detail struct {
 }
 
 const (
-	TableName="session"
-	EntityName="session"
+	TableName="admin_session"
+	EntityName="admin_session"
 	ExpireTime=300  //time in seconds
 	Prefix="sAd"
 )
