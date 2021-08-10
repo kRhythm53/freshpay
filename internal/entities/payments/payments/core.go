@@ -3,6 +3,7 @@ package payments
 import (
 	"errors"
 	"fmt"
+	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/campaigns"
 	"github.com/freshpay/internal/entities/payments/utilities"
@@ -50,7 +51,7 @@ func GetPaymentsByTime(payments *[]Payments, from string, to string, Transaction
 		endTime, err = strconv.ParseInt(to, 10, 64)
 	}
 	var Wallet wallet.Detail
-	wallet.GetWalletByUserId(&Wallet,userID)
+	wallet.GetWalletByUserId(&Wallet, userID)
 
 	return GetPaymentByTimeFromDB(payments, startTime, endTime, TransactionType, Wallet.ID)
 }
@@ -60,7 +61,7 @@ func UpdatePayment(payment *Payments) (err error) {
 	if err != nil {
 		return err
 	}
-	err = user.UpdateTransactionCount(id)
+	err = UpdateTransactionCount(id)
 	if err != nil {
 		return err
 	}
@@ -212,4 +213,15 @@ func GetUserIdFromFundId(FundId string) (string, error) {
 		userID = Source.UserId
 	}
 	return userID, nil
+}
+
+func UpdateTransactionCount(userID string) (err error) {
+	var User user.Detail
+	err = user.GetUserById(&User, userID)
+	if err != nil {
+		return
+	}
+	User.NumberOfTransactions = User.NumberOfTransactions + 1
+	config.DB.Table("user").Save(&User)
+	return nil
 }
