@@ -31,6 +31,12 @@ func SetupRouter() *gin.Engine {
 
 		grp2.GET("balance",user_management.GetWalletBalance)
 	}
+	grp5:= r.Group("/admin")
+	{
+		grp5.POST("signup",admin_management.SignUp)
+		grp5.POST("signup/otp/verification",otp_verification.VerifyOTPAdmin)
+		grp5.POST("signin",admin_management.LoginByPassword)
+	}
 	grp3:= r.Group("/campaigns")
 	{
 		grp3.POST("/",campaigns.CreateCampaign)
