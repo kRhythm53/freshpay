@@ -137,7 +137,6 @@ func ValidityCheck(payment *Payments) (err error) {
 
 func InitiateRefund(paymentID string, UserID string) (RefundID string, err error) {
 	var RefundPayment Payments
-
 	var payment *Payments
 	err2 := GetPaymentByID(payment, paymentID)
 	if err2 != nil {
