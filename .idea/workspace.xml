@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ea80d43b-7217-46d9-a666-6c6d51cfdbb2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/internal/entities/payments/payments/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/payments/payments/core.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/entities/user_management/bank/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/bank/core.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/middleware/middleware.go" beforeDir="false" afterPath="$PROJECT_DIR$/middleware/middleware.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/routes/routes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/entities/user_management/user/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/entities/user_management/user/core.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
