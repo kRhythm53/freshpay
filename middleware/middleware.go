@@ -30,6 +30,11 @@ var userPath=[]string{
 	"/users/bankaccount",
 	"/users/bankaccounts",
 	"/users/beneficiary",
+	"/payments",
+	"/payments/:payments_id",
+	"/payments/",
+	"/campaigns/",
+	"/campaigns/:campaign_id",
 }
 
 var adminPath=[]string{
