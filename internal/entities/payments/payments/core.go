@@ -50,7 +50,7 @@ func GetPaymentsByTime(payments *[]Payments, from string, to string, Transaction
 		endTime, err = strconv.ParseInt(to, 10, 64)
 	}
 	var Wallet wallet.Detail
-	wallet.GetWalletByUserId(&Wallet,userID)
+	wallet.GetWalletByUserId(&Wallet, userID)
 
 	return GetPaymentByTimeFromDB(payments, startTime, endTime, TransactionType, Wallet.ID)
 }
