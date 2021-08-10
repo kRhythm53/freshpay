@@ -39,7 +39,9 @@ var userPath = []string{
 }
 
 var adminPath = []string{
-
+	"/admin/complaint/:complaint_id",
+	"/admin/complaints",
+	"/admin/active_complaints",
 }
 
 /*
