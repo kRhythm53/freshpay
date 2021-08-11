@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/OTP"
-	"github.com/freshpay/internal/entities/user_management/session"
+	"github.com/freshpay/internal/entities/user_management/user_session"
 	"github.com/freshpay/internal/entities/user_management/utilities"
 	"github.com/freshpay/internal/entities/user_management/wallet"
 
@@ -22,7 +22,14 @@ func VerifyPhoneNumber(phoneNumber string) bool {
 //SignUp will be used to create a user on signup
 func SignUp(user *Detail) (err error) {
 	phoneNumber := user.PhoneNumber
-
+	if len(phoneNumber)!=10 || phoneNumber[0]=='0'{
+		err=errors.New("phone number should be 10 digit long")
+		return err
+	}
+	if !utilities.IsNumeric(phoneNumber){
+		err=errors.New("Phone number can contain characters 0-9")
+		return err
+	}
 	/*
 	   Make sure PhoneNumber doesn't exist
 	*/
@@ -41,7 +48,19 @@ func SignUp(user *Detail) (err error) {
 	if err != nil {
 		return err
 	}
-	user.ID = utilities.CreateID(Prefix, 14)
+	user.ID = utilities.CreateID(Prefix, IDLengthExcludingPrefix)
+
+	/*
+	 Encrypt the password
+	 */
+	var passwordHash string
+	err=utilities.GetEncryption(user.Password,&passwordHash)
+	if err!=nil{
+		return err
+	}
+	user.Password= passwordHash
+
+	//now create the user
 	if err = config.DB.Create(user).Error; err != nil {
 		return err
 	}
@@ -85,24 +104,30 @@ func DeleteUser(user *Detail) (err error) {
 	return err
 }
 
-//Login will login the user and will create a session
-func LoginByPassword(phoneNumber string, password string, Session *session.Detail) (err error) {
-	var user Detail
-	err = GetUserByPhoneNumber(&user, phoneNumber)
+//Login will login the user and will create a user_session
+func LoginByPassword(phoneNumber string, password string, Session *user_session.Detail, user *Detail) (err error) {
+	err = GetUserByPhoneNumber(user, phoneNumber)
 	if err == nil {
 		if !user.IsVerified {
 			err = errors.New("Phone Number is not verified, please signup again")
+			fmt.Println(err)
 			/*
 			   need to remove this line
 			*/
 			//return err
 		}
-		if user.Password != password {
+		if  !utilities.MatchPassword(password,user.Password){
 			err = errors.New("Password is Wrong")
 		} else {
+			err=user_session.GetActiveSessionByUserId(Session,user.ID)
+			if err==nil{
+				return nil
+			}
 			Session.UserId = user.ID
-			err = session.CreateSession(Session)
+			err = user_session.CreateSession(Session)
 		}
+	}else{
+		err=errors.New("Phone Number is wrong or not registered")
 	}
 	return err
 }

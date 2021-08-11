@@ -13,9 +13,10 @@ type Detail struct {
 }
 
 const (
-	TableName="beneficiary"
-	EntityName="beneficiary"
-	Prefix="ben"
+	TableName               ="beneficiary"
+	EntityName              ="beneficiary"
+	IDLengthExcludingPrefix =14
+	Prefix                  ="ben"
 )
 func(sd *Detail) TableName() string{
 	return TableName

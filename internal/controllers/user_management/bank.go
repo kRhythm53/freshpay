@@ -1,9 +1,9 @@
 package user_management
 
 import (
-	"fmt"
 	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/gin-gonic/gin"
+
 	"net/http"
 )
 
@@ -22,9 +22,7 @@ func AddBankAccount(c *gin.Context){
 }
 
 func GetAllBankAccountByUserId(c *gin.Context){
-	fmt.Println("inside GetAll bank accounts")
 	userId :=c.GetString("userId")
-	fmt.Println("userId", userId);
 	var bankAccount []bank.Detail
 	err:=bank.GetAllBankAccountsByUserId(&bankAccount,userId)
 	if err!=nil{
@@ -33,3 +31,4 @@ func GetAllBankAccountByUserId(c *gin.Context){
 		c.JSON(http.StatusOK,bankAccount)
 	}
 }
+

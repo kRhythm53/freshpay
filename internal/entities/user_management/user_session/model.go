@@ -1,20 +1,20 @@
-package admin_session
+package user_session
 
 import "gorm.io/gorm"
 
 type Detail struct {
 	gorm.Model
 	ID         string `gorm:"type:varchar(20)"`
-	AdminId     string
+	UserId     string
 	ExpireTime uint64
 }
 
 const (
-	TableName               ="admin_session"
-	EntityName              ="admin_session"
-	ExpireTime              =300000000  //time in seconds
+	TableName               ="user_session"
+	EntityName              ="user_session"
+	ExpireTime              =300  //time in seconds
 	IDLengthExcludingPrefix =14
-	Prefix                  ="sAdm"
+	Prefix                  ="sUsr"
 )
 
 func(sd *Detail) TableName() string{

@@ -2,8 +2,9 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"github.com/freshpay/internal/entities/admin/admin_session"
-	"github.com/freshpay/internal/entities/user_management/session"
+	"github.com/freshpay/internal/entities/user_management/user_session"
 	"github.com/gin-gonic/gin"
 	"strings"
 	"time"
@@ -19,6 +20,7 @@ var noSessionIdPath = []string{
 }
 
 func isNoSessionIdPath(Path string) bool {
+	fmt.Println(Path)
 	for _, path := range noSessionIdPath {
 		if Path == path {
 			return true
@@ -74,37 +76,45 @@ func Authenticate(c *gin.Context) {
 		c.Next()
 		return
 	}
+	if len(c.Request.Header["Session_id"])==0{
+		c.AbortWithError(403,errors.New("Session Id is invalid"))
+		return
+	}
 	sessionId := c.Request.Header["Session_id"][0]
+	if len(sessionId) <user_session.IDLengthExcludingPrefix{
+		c.AbortWithError(403,errors.New("Session Id is invalid"))
+		return
+	}
 	//if sessionId belongs to user
 	sender := strings.Split(sessionId, "_")[0]
-	if sender == session.Prefix {
+	if sender == user_session.Prefix {
 		if !isUserPath(c.FullPath()) {
-			c.AbortWithError(400, errors.New("acess denied"))
+			c.AbortWithError(403, errors.New("acess denied"))
 			return
 		}
-		var Session session.Detail
-		err1 := session.GetSessionById(&Session, sessionId)
+		var Session user_session.Detail
+		err1 := user_session.GetSessionById(&Session, sessionId)
 		if err1 != nil {
-			c.AbortWithStatus(403)
+			c.AbortWithError(403,errors.New("Session Id is invalid, Please Sign in again"))
 			return
 		} else if Session.ExpireTime < uint64(time.Now().Unix()) {
-			c.AbortWithError(400, errors.New("Session has expired"))
+			c.AbortWithError(400, errors.New("Session has expired , Please Sign in again"))
 			return
 		}
 		userId := Session.UserId
 		c.Set("userId", userId)
 	} else if sender == admin_session.Prefix {
 		if !isAdminPath(c.FullPath()) {
-			c.AbortWithError(400, errors.New("acess denied"))
+			c.AbortWithError(403, errors.New("acess denied"))
 			return
 		}
 		var Session admin_session.Detail
 		err1 := admin_session.GetSessionById(&Session, sessionId)
 		if err1 != nil {
-			c.AbortWithStatus(403)
+			c.AbortWithError(403,errors.New("Session Id is invalid, Please Sign in again"))
 			return
 		} else if Session.ExpireTime < uint64(time.Now().Unix()) {
-			c.AbortWithError(400, errors.New("Session has expired"))
+			c.AbortWithError(400, errors.New("Session has expired, Please Sign in again"))
 			return
 		}
 		adminId := Session.AdminId

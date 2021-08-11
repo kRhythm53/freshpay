@@ -13,6 +13,18 @@ import (
 //SignUp will be used to create a admin on signup
 func SignUp(admin *Detail) (err error){
 	phoneNumber :=admin.PhoneNumber
+	/*
+	    Validate the phoneNumber-> Phone number is of 10 digits and only have 0-9 characters
+	 */
+	if len(phoneNumber)!=10 || phoneNumber[0]=='0'{
+		err=errors.New("phone number should be 10 digit long")
+		return err
+	}
+	if !utilities.IsNumeric(phoneNumber){
+		err=errors.New("Phone number can contain characters 0-9")
+		return err
+	}
+
 
 	/*
 	   Make sure PhoneNumber doesn't exist
@@ -28,11 +40,25 @@ func SignUp(admin *Detail) (err error){
 			return err
 		}
 	}
+
 	err= OTP.SendOTP(phoneNumber)
 	if err!=nil{
 		return err
 	}
-	admin.ID=utilities.CreateID(Prefix,14)
+
+	/*
+	 Encrypt the password
+	*/
+	var passwordHash string
+	err=utilities.GetEncryption(admin.Password,&passwordHash)
+	if err!=nil{
+		return err
+	}
+	admin.Password= passwordHash
+
+
+	//now create the admin
+	admin.ID=utilities.CreateID(Prefix,IDLengthExcludingPrefix)
 
 	if err=config.DB.Create(admin).Error; err!=nil{
 		return err
@@ -61,10 +87,9 @@ func GetAdminByPhoneNumber(admin *Detail, phoneNumber string)(err error){
 	return nil
 }
 
-//Login will login the Admin and will create a session
-func LoginByPassword(phoneNumber string, password string, Session *admin_session.Detail)(err error) {
-	var admin Detail
-	err = GetAdminByPhoneNumber(&admin, phoneNumber)
+//Login will login the Admin and will create a user_session
+func LoginByPassword(phoneNumber string, password string, Session *admin_session.Detail, admin *Detail)(err error) {
+	err = GetAdminByPhoneNumber(admin, phoneNumber)
 
 	if err == nil {
 		if !admin.IsVerified{
@@ -75,14 +100,19 @@ func LoginByPassword(phoneNumber string, password string, Session *admin_session
 			*/
 			//return err
 		}
-		if admin.Password != password {
+		if !utilities.MatchPassword(password,admin.Password) {
 			err = errors.New("Password is Wrong")
 		} else {
+			err=admin_session.GetActiveSessionByAdminId(Session,admin.ID)
+			if err==nil{
+				return nil
+			}
 			Session.AdminId=admin.ID
 			err = admin_session.CreateSession(Session)
 		}
+	} else{
+		err=errors.New("Phone Number is wrong or not registered")
 	}
-	fmt.Println("error : ", err)
 	return err
 }
 

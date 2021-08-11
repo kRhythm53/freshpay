@@ -8,7 +8,7 @@ import (
 
 //CreateBank will create a new bank
 func CreateBank(bank *Detail, userId string) (err error) {
-	bank.ID = utilities.CreateID(Prefix, 14)
+	bank.ID = utilities.CreateID(Prefix, IDLengthExcludingPrefix)
 	bank.UserId = userId
 	fmt.Println("banK: ", bank)
 	if err = config.DB.Create(bank).Error; err != nil {
