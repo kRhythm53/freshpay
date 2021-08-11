@@ -11,9 +11,10 @@ type Detail struct {
 }
 
 const (
-	TableName="wallet"
-	EntityName="wallet"
-	Prefix="wal"
+	TableName               ="wallet"
+	EntityName              ="wallet"
+	Prefix                  ="wal"
+	IDLengthExcludingPrefix =14 //length used for alphanumeric string (exculding prefix
 )
 func(sd *Detail) TableName() string{
 	return TableName

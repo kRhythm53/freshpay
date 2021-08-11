@@ -56,5 +56,10 @@ func SetupRouter() *gin.Engine {
 		grp5.GET("complaint/:complaint_id",complaints.GetComplaintById)
 		grp5.PATCH("complaint/:complaint_id",complaints.UpdateComplaintById)
 	}
+
+	grp6:= r.Group("/wallet")
+	{
+		grp6.GET("/:phone_number",user_management.GetWalletByPhoneNumber)
+	}
 	return r
 }

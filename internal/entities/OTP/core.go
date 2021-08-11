@@ -32,6 +32,7 @@ func SetValue(key string, value string, expiry time.Duration) error {
 
 // sendmessage will send sms using gobudgetsms
 func sendmessage(phoneNumber string, otp string) error{
+	return nil //need to remove this line to send message
 	message := "Your OTP for freshpay signup is " + otp
 	res, err := gobudgetsms.SendSMS(smsConfig, message,phoneNumber , "freshpay")
 	if err != nil {

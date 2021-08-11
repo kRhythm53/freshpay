@@ -1,9 +1,9 @@
 package user_management
 
 import (
-	"fmt"
 	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/gin-gonic/gin"
+
 	"net/http"
 )
 
@@ -15,21 +15,46 @@ func AddBankAccount(c *gin.Context){
 	c.BindJSON(&bankAccount)
 	err:=bank.CreateBank(&bankAccount,userId)
 	if err!=nil{
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.JSON(500,gin.H{
+			"Code": "BAD_REQUEST_ERROR",
+			"Status":"failed",
+			"Description":err.Error(),
+			"Source": "business",
+			"Reason": "input_validation_failed",
+			"Step": "NA",
+			"Metadata":"{}",
+		})
 	} else{
-		c.JSON(http.StatusOK,bankAccount)
+		c.JSON(http.StatusOK, gin.H{
+			"Status":"success",
+			"Entity":bank.EntityName,
+			"ID":bankAccount.ID,
+			"BankName":bankAccount.BankName,
+			"AccountNumber":bankAccount.AccountNumber,
+			"IFSCCode":bankAccount.IFSCCode,
+		})
 	}
 }
 
 func GetAllBankAccountByUserId(c *gin.Context){
-	fmt.Println("inside GetAll bank accounts")
 	userId :=c.GetString("userId")
-	fmt.Println("userId", userId);
-	var bankAccount []bank.Detail
-	err:=bank.GetAllBankAccountsByUserId(&bankAccount,userId)
+	var bankAccounts []bank.Detail
+	err:=bank.GetAllBankAccountsByUserId(&bankAccounts,userId)
 	if err!=nil{
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"Code": "Internal_Server_Error",
+			"Status":"failed",
+			"Description":err.Error(),
+			"Source": "internal",
+			"Reason": "",
+			"Step": "NA",
+			"Metadata":"{}",
+		})
 	} else{
-		c.JSON(http.StatusOK,bankAccount)
+		c.JSON(http.StatusOK, gin.H{
+			"Status":        "success",
+			"Entity":        bank.EntityName,
+			"BankDetails":    bankAccounts,
+		})
 	}
 }
