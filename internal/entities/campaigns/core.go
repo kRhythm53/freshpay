@@ -37,7 +37,6 @@ func Eligibility(Time int64, Amount int64, userid string) int {
 	}
 	TransNum := UserRow.NumberOfTransactions
 	var ValidCampaigns []Campaign
-	fmt.Println(Time, TransNum, Amount)
 	err := ValidCampaignQuery(Time, TransNum, &ValidCampaigns)
 	if err != nil {
 		return cashback

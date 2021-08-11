@@ -3,7 +3,6 @@ package admin_management/*
 */import (
 	"github.com/freshpay/internal/entities/admin"
 	"github.com/freshpay/internal/entities/admin/admin_session"
-	"github.com/freshpay/internal/entities/user_management/user"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
