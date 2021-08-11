@@ -287,6 +287,7 @@ func CreateRzpAccount() (err error) {
 		return err
 	}
 	constants.RzpWalletID = RZPWallet.ID
-	wallet.UpdateWalletBalance(constants.RzpWalletID, 10000000000)
+	amount := constants.RazorpayBalance - RZPWallet.Balance
+	wallet.UpdateWalletBalance(constants.RzpWalletID, int64(amount))
 	return nil
 }
