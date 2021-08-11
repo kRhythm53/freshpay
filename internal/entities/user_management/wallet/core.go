@@ -31,15 +31,6 @@ func GetWalletByUserId(wallet *Detail,userId string)(err error){
 	return nil
 }
 
-func GetWalletBalanceByUserId(wallet *Detail,userId string)(err error){
-	if err=config.DB.Where("user_id = ?",userId).First(wallet).Error;err!=nil{
-		return err
-	}
-	wallet.UserId=""
-	wallet.ID=""
-	return nil
-}
-
 func UpdateWalletBalance(walletID string,amount int64){
 	var Wallet Detail
 	err := GetWalletById(&Wallet, walletID)

@@ -17,6 +17,7 @@ var noSessionIdPath = []string{
 	"/admin/signin",
 	"/users/signup/otp/verification",
 	"/admin/signup/otp/verification",
+	"/wallet/:phone_number",
 }
 
 func isNoSessionIdPath(Path string) bool {
