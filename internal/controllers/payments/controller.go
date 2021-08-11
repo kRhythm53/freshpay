@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+type response struct{
+	payment payments.Payments
+	entity string
+}
 func AddPayments(c *gin.Context) {
 	var payment payments.Payments
 	err := c.BindJSON(&payment)
@@ -17,7 +21,7 @@ func AddPayments(c *gin.Context) {
 	if err2 != nil {
 		c.String(http.StatusBadRequest, err2.Error())
 	} else {
-		c.JSON(http.StatusOK, payment)
+		c.JSON(http.StatusOK, response{payment: payment,entity: "payments"})
 	}
 }
 
