@@ -31,6 +31,7 @@ var userPath = []string{
 	"/users/bankaccount",
 	"/users/bankaccounts",
 	"/users/beneficiary",
+	"/users/balance",
 	"/payments",
 	"/payments/:payments_id",
 	"/payments/",
