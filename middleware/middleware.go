@@ -34,14 +34,13 @@ var userPath = []string{
 	"/users/bankaccounts",
 	"/users/beneficiary",
 	"/users/balance",
-
 	"/payments",
 	"/payments/:payments_id",
 	"/payments/",
 	"/campaigns/",
 	"/campaigns/:campaign_id",
 	"/users/complaint",
-
+	"/campaigns/active",
 }
 
 var adminPath = []string{
