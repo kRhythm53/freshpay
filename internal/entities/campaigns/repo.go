@@ -34,7 +34,7 @@ func DeleteCampaignFromDB(campaign *Campaign, id string) (err error) {
 	return nil
 }
 func UserQueryFromDB(UserRow *user.Detail, userid string) (err error) {
-	return config.DB.Table("user").Where("id = ?", userid).First(&UserRow).Error
+	return config.DB.Table("user").Where("id = ?", userid).First(UserRow).Error
 }
 func ValidCampaignQuery(Time int64, TransNum int64, ValidCampaigns *[]Campaign) (err error) {
 	return config.DB.Table("campaign").Where("start_time <= ? AND end_time >= ? AND transaction_number = ?", Time, Time, TransNum).Find(ValidCampaigns).Error
