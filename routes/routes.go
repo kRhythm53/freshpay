@@ -41,7 +41,7 @@ func SetupRouter() *gin.Engine {
 	grp3 := r.Group("/campaigns")
 	{
 		grp3.POST("/", campaigns.CreateCampaign)
-		grp3.GET("/", campaigns.GetCampaign)
+		grp3.GET("/active", campaigns.GetCampaign)
 		grp3.GET("/:campaign_id", campaigns.GetCampaignByID)
 		grp3.PATCH("/:campaign_id", campaigns.UpdateCampaign)
 	}

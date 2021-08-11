@@ -15,7 +15,7 @@ func GetAllCampaigns(campaign *[]Campaign ) (err error) {
 }
 
 func CreateCampaign(campaign *Campaign  ) (err error) {
-	campaign.ID =  utilities.RandomString(14,ComplaintPrefix)
+	campaign.ID =  utilities.RandomString(14, CampaignPrefix)
 	if err = config.DB.Table("campaign").Create(campaign).Error; err != nil {
 		return err
 	}

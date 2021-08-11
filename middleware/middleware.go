@@ -36,6 +36,7 @@ var userPath = []string{
 	"/payments/:payments_id",
 	"/payments/",
 	"/users/complaint",
+	"/campaigns/active",
 }
 
 var adminPath = []string{
@@ -44,7 +45,6 @@ var adminPath = []string{
 	"/admin/active_complaints",
 	"/campaigns/",
 	"/campaigns/:campaign_id",
-
 }
 
 /*
