@@ -2,12 +2,9 @@ package OTP
 
 import (
 	"errors"
-	"math/rand"
-
 	"fmt"
+	"github.com/freshpay/utilities"
 	"github.com/souvikhaldar/gobudgetsms"
-	"math"
-	"strconv"
 	"time"
 )
 
@@ -15,11 +12,7 @@ import (
 /*
 will create a random number
  */
-func CreateOTP() string {
-	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
-	otp:=strconv.Itoa(seededRand.Intn(int(math.Pow(10,otp_length))))
-	return otp
-}
+
 
 
 // SetValue sets the key value pair
@@ -46,7 +39,7 @@ func sendmessage(phoneNumber string, otp string) error{
 	this function will create otp and will send the otp and save the otp
  */
 func SendOTP(phoneNumber string)(err error){
-	otp:=CreateOTP()
+	otp:=utilities.CreateOTP(otp_length)
 	err=SetValue(phoneNumber,otp,ExpireTime)
 	if err!=nil{
 		//err=errors.New("Error in setting OTP to redis")

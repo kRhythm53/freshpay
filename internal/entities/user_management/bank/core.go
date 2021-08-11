@@ -1,22 +1,15 @@
 package bank
 
 import (
-	"errors"
 	"fmt"
 	"github.com/freshpay/internal/config"
-	"github.com/freshpay/internal/entities/user_management/utilities"
+	"github.com/freshpay/utilities"
 )
 
 //CreateBank will create a new bank
 func CreateBank(bank *Detail, userId string) (err error) {
-	fmt.Println("accountNumber: ",bank.AccountNumber);
-	if len(bank.AccountNumber)<9 || len(bank.AccountNumber)>18{
-		fmt.Println("x: " ,len(bank.AccountNumber))
-		err=errors.New("Number of characters in account number should be b/w 9 and 18")
-		return err
-	}
-	if len(bank.IFSCCode) !=11{
-		err=errors.New("Number of characters in IFSCCode should be 11")
+	err=Validate(bank)
+	if err!=nil{
 		return err
 	}
 	bank.ID = utilities.CreateID(Prefix, IDLengthExcludingPrefix)
@@ -42,4 +35,14 @@ func GetAllBankAccountsByUserId(bank *[]Detail, user_id string) (err error) {
 		return err
 	}
 	return nil
+}
+
+//Validate Details
+func Validate(bankAccount *Detail) (err error){
+	err=utilities.ValidateBankAccountNumber(bankAccount.AccountNumber);
+	if err!=nil{
+		return err
+	}
+	err=utilities.ValidateIFSCCode(bankAccount.IFSCCode)
+	return err
 }

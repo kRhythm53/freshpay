@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+
+/*
+PublicPath stores the public paths, paths that can be accessed by anyone
+ */
 var PublicPath = []string{
 	"/users/signup",
 	"/users/signin",
@@ -19,6 +23,9 @@ var PublicPath = []string{
 	"/wallet/:phone_number",
 }
 
+/*
+	isPublicPath will return true if the path is Public else it will return false
+ */
 func isPublicPath(Path string) bool {
 	for _, path := range PublicPath {
 		if Path == path {
@@ -28,6 +35,9 @@ func isPublicPath(Path string) bool {
 	return false
 }
 
+/*
+userPath will stores the path belonging to user
+ */
 var userPath = []string{
 	"/users/bankaccount",
 	"/users/bankaccounts",
@@ -40,6 +50,10 @@ var userPath = []string{
 	"/campaigns/active",
 }
 
+
+/*
+adminPath will store path belonging to admin
+ */
 var adminPath = []string{
 	"/admin/complaint/:complaint_id",
 	"/admin/complaints",
@@ -71,6 +85,7 @@ func isAdminPath(Path string) bool {
 	}
 	return false
 }
+
 
 func Authenticate(c *gin.Context) {
 	if isPublicPath(c.FullPath()) {
@@ -127,6 +142,11 @@ func Authenticate(c *gin.Context) {
 	}
 
 }
+
+
+/*
+ExtractSessionIdFromHeaders will get session Id from the headers
+ */
 func ExtractSessionIdFromHeaders(c *gin.Context) string{
 	header:= c.Request.Header["Session_id"] //S of Session_id has to be capital
 	if len(header)==0{
@@ -135,6 +155,9 @@ func ExtractSessionIdFromHeaders(c *gin.Context) string{
 	return header[0]
 }
 
+/*
+ValidatePath  will validate the path of the sender or will error a Error
+ */
 func ValidatePath(sender string,Path string)  *Error.Detail{
 	if (sender==user_session.Prefix && isUserPath(Path)) ||(sender==admin_session.Prefix && isAdminPath(Path)){
 		return nil
@@ -145,6 +168,11 @@ func ValidatePath(sender string,Path string)  *Error.Detail{
 	}
 	return &err
 }
+
+
+/*
+ 	ValidateUserSessionId will validate the user session or will return the Rrror
+ */
 func ValidateUserSessionId(sessionId string,Session *user_session.Detail) *Error.Detail{
 	var err error
 	err=user_session.GetSessionById(Session,sessionId)
@@ -165,6 +193,9 @@ func ValidateUserSessionId(sessionId string,Session *user_session.Detail) *Error
 	return nil
 }
 
+/*
+	ValidateAdminSessionId will validate the user session or will return the Rrror
+*/
 func ValidateAdminSessionId(sessionId string,Session *admin_session.Detail) *Error.Detail{
 	var err error
 	err=admin_session.GetSessionById(Session,sessionId)
