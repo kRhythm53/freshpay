@@ -29,15 +29,14 @@ func DeleteCampaign(campaign *Campaign, id string) (err error) {
 }
 
 func Eligibility(Time int64, Amount int64, userid string) int {
-	var UserRow *user.Detail
+	var UserRow user.Detail
 	cashback := 0
-	err1 := UserQueryFromDB(UserRow, userid)
+	err1 := UserQueryFromDB(&UserRow, userid)
 	if err1 != nil {
 		return cashback
 	}
 	TransNum := UserRow.NumberOfTransactions
 	var ValidCampaigns []Campaign
-	fmt.Println(Time, TransNum, Amount)
 	err := ValidCampaignQuery(Time, TransNum, &ValidCampaigns)
 	if err != nil {
 		return cashback

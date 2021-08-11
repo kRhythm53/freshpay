@@ -23,10 +23,10 @@ func CreateCampaign(c *gin.Context) {
 		fmt.Println("could not read json")
 		return
 	}
-	fmt.Println(&user)
+	//fmt.Println(&user)
 	err2 := campaigns.CreateCampaign(&user)
 	if err2 != nil {
-		fmt.Println(err.Error())
+		//fmt.Println(err.Error())
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {
 		c.JSON(http.StatusOK, user)
