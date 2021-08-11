@@ -47,7 +47,6 @@ func GetCampaignByID(c *gin.Context) {
 func UpdateCampaign(c *gin.Context) {
 	var user campaigns.Campaign
 	id := c.Params.ByName("campaign_id")
-	fmt.Println(id)
 	err := campaigns.GetCampaignByID(&user, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound,user)
