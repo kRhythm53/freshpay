@@ -9,12 +9,14 @@ type Detail struct {
 	BankName      string
 	AccountNumber string
 	IFSCCode      string
+	AccountHolderName string
 }
 
 const (
-	TableName="bank"
-	EntityName="bank"
-	Prefix="bnk"
+	TableName               ="bank"
+	EntityName              ="bank"
+	Prefix                  ="bnk"
+	IDLengthExcludingPrefix =14
 )
 func(sd *Detail) TableName() string{
 	return TableName

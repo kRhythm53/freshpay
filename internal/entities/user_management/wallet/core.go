@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"fmt"
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/user_management/utilities"
 )
@@ -8,7 +9,7 @@ import (
 //CreateWallet will create a new wallet
 func CreateWallet(userId string)(err error){
 	var wallet Detail
-	wallet.ID=utilities.CreateID(Prefix,14)
+	wallet.ID=utilities.CreateID(Prefix, IDLengthExcludingPrefix)
 	wallet.UserId=userId
 	if err=config.DB.Create(&wallet).Error; err!=nil{
 		return err
@@ -25,18 +26,10 @@ func GetWalletById(wallet *Detail,id string)(err error){
 }
 
 func GetWalletByUserId(wallet *Detail,userId string)(err error){
+	fmt.Println("user_id: ",userId);
 	if err=config.DB.Table("wallet").Where("user_id = ?",userId).First(wallet).Error;err!=nil{
 		return err
 	}
-	return nil
-}
-
-func GetWalletBalanceByUserId(wallet *Detail,userId string)(err error){
-	if err=config.DB.Where("user_id = ?",userId).First(wallet).Error;err!=nil{
-		return err
-	}
-	wallet.UserId=""
-	wallet.ID=""
 	return nil
 }
 

@@ -34,7 +34,7 @@ func CreateCampaign(c *gin.Context) {
 }
 
 func GetCampaignByID(c *gin.Context) {
-	id := c.Params.ByName("id")
+	id := c.Params.ByName("campaign_id")
 	var user campaigns.Campaign
 	err := campaigns.GetCampaignByID(&user, id)
 	if err != nil {
@@ -46,7 +46,7 @@ func GetCampaignByID(c *gin.Context) {
 
 func UpdateCampaign(c *gin.Context) {
 	var user campaigns.Campaign
-	id := c.Params.ByName("id")
+	id := c.Params.ByName("campaign_id")
 	err := campaigns.GetCampaignByID(&user, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound,user)
@@ -65,7 +65,7 @@ func UpdateCampaign(c *gin.Context) {
 
 func DeleteCampaign(c *gin.Context) {
 	var user campaigns.Campaign
-	id := c.Params.ByName("id")
+	id := c.Params.ByName("campaign_id")
 	err := campaigns.DeleteCampaign(&user, id)
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)

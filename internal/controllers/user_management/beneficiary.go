@@ -13,9 +13,24 @@ func AddBeneficiary(c *gin.Context){
 	c.BindJSON(&Beneficiary)
 	err:=beneficiary.CreateBeneficiary(&Beneficiary,userId)
 	if err!=nil{
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.JSON(500,gin.H{
+			"Code": "BAD_REQUEST_ERROR",
+			"Status":"failed",
+			"Description":err.Error(),
+			"Source": "business",
+			"Reason": "input_validation_failed",
+			"Step": "NA",
+			"Metadata":"{}",
+		})
 	} else{
-		c.JSON(http.StatusOK,Beneficiary)
+		c.JSON(http.StatusOK, gin.H{
+			"Status":"Success",
+			"Entity":beneficiary.EntityName,
+			"ID":Beneficiary.ID,
+			"BankName":Beneficiary.BankName,
+			"AccountNumber":Beneficiary.AccountNumber,
+			"IFSCCode":Beneficiary.IFSCCode,
+		})
 	}
 }
 
@@ -24,8 +39,20 @@ func GetAllBeneficiaryByUserId(c *gin.Context){
 	var Beneficiary []beneficiary.Detail
 	err:=beneficiary.GetAllBeneficiaryAccountsByUserId(&Beneficiary,userId)
 	if err!=nil{
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"Code": "Internal_Server_Error",
+			"Status":"failed",
+			"Description":err.Error(),
+			"Source": "internal",
+			"Reason": "",
+			"Step": "NA",
+			"Metadata":"{}",
+		})
 	} else{
-		c.JSON(http.StatusOK,Beneficiary)
+		c.JSON(http.StatusOK, gin.H{
+			"Status":        "Success",
+			"Entity":        beneficiary.EntityName,
+			"BankDetails":    Beneficiary,
+		})
 	}
 }

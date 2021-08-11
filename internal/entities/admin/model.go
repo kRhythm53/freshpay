@@ -16,6 +16,7 @@ const (
 	TableName="admin"
 	EntityName="admin"
 	Prefix="ad"
+	IDLengthExcludingPrefix=14
 )
 func(sd *Detail) TableName() string{
 	return TableName

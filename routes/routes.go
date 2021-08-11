@@ -41,7 +41,7 @@ func SetupRouter() *gin.Engine {
 	grp3 := r.Group("/campaigns")
 	{
 		grp3.POST("/", campaigns.CreateCampaign)
-		grp3.GET("/", campaigns.GetCampaign)
+		grp3.GET("/active", campaigns.GetCampaign)
 		grp3.GET("/:campaign_id", campaigns.GetCampaignByID)
 		grp3.PATCH("/:campaign_id", campaigns.UpdateCampaign)
 	}
@@ -55,6 +55,11 @@ func SetupRouter() *gin.Engine {
 		grp5.GET("active_complaints",complaints.GetActiveComplaints)
 		grp5.GET("complaint/:complaint_id",complaints.GetComplaintById)
 		grp5.PATCH("complaint/:complaint_id",complaints.UpdateComplaintById)
+	}
+
+	grp6:= r.Group("/wallet")
+	{
+		grp6.GET("/:phone_number",user_management.GetWalletByPhoneNumber)
 	}
 	return r
 }

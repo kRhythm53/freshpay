@@ -13,15 +13,27 @@ func VerifyOTPUser(c *gin.Context){
 	c.BindJSON(&otp)
 
 	err:= OTP.VerifyOTP(otp)
-	if err!=nil{
-		c.AbortWithError(400,err)
-	} else{
+	if err==nil{
 		err=user.SetVerifiedUserByPhoneNumber(otp.PhoneNumber)
-		if err!=nil{
-			c.AbortWithError(400,err)
-		} else{
-			c.JSON(http.StatusOK,"Your account has been registered successfully")
+		if err==nil{
+			c.JSON(http.StatusOK, gin.H{
+				"Entity":user.EntityName,
+				"Status":"Success",
+				"Message":"User Account Registered Succesfully",
+				"PhoneNumber":otp.PhoneNumber,
+			})
 		}
+	}
+	if err!=nil{
+		c.JSON(http.StatusBadRequest,gin.H{
+			"Code": "BAD_REQUEST_ERROR",
+			"Status":"failed",
+			"Description":err.Error(),
+			"Source": "business",
+			"Reason": "Wrong OTP",
+			"Step": "NA",
+			"Metadata":"{}",
+		})
 	}
 }
 func VerifyOTPAdmin(c *gin.Context){
@@ -29,14 +41,26 @@ func VerifyOTPAdmin(c *gin.Context){
 	c.BindJSON(&otp)
 
 	err:= OTP.VerifyOTP(otp)
-	if err!=nil{
-		c.AbortWithError(400,err)
-	} else{
+	if err==nil{
 		err=admin.SetVerifiedAdminByPhoneNumber(otp.PhoneNumber)
-		if err!=nil{
-			c.AbortWithError(400,err)
-		} else{
-			c.JSON(http.StatusOK,"Your account has been registered successfully")
+		if err==nil{
+			c.JSON(http.StatusOK, gin.H{
+				"Entity":admin.EntityName,
+				"Status":"Success",
+				"Message":"Admin Account Registered Succesfully",
+				"PhoneNumber":otp.PhoneNumber,
+			})
 		}
+	}
+	if err!=nil{
+		c.JSON(http.StatusBadRequest,gin.H{
+			"Code": "BAD_REQUEST_ERROR",
+			"Status":"failed",
+			"Description":err.Error(),
+			"Source": "business",
+			"Reason": "Wrong OTP or phone number",
+			"Step": "NA",
+			"Metadata":"{}",
+		})
 	}
 }

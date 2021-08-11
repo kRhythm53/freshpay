@@ -11,8 +11,8 @@ import (
 	"github.com/freshpay/internal/entities/payments/transactions"
 	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/freshpay/internal/entities/user_management/beneficiary"
-	"github.com/freshpay/internal/entities/user_management/session"
 	"github.com/freshpay/internal/entities/user_management/user"
+	"github.com/freshpay/internal/entities/user_management/user_session"
 	"github.com/freshpay/internal/entities/user_management/wallet"
 	"github.com/freshpay/routes"
 	"gorm.io/driver/mysql"
@@ -33,14 +33,15 @@ func main() {
 	//defer config.DB.Close()
 	config.DB.AutoMigrate(&payments2.Payments{},&transactions.Transactions{})
 	config.DB.AutoMigrate(&campaigns.Campaign{},&complaints.Complaint{})
-	config.DB.AutoMigrate(&admin.Detail{},&bank.Detail{},&user.Detail{},&beneficiary.Detail{},&session.Detail{},
+	config.DB.AutoMigrate(&admin.Detail{},&bank.Detail{},&user.Detail{},&beneficiary.Detail{},&user_session.Detail{},
 	&wallet.Detail{},&admin_session.Detail{})
 
 	go transactions.InitiateTransaction()
 	go payments2.PaymentReceiver()
 	err := payments2.CreateRzpAccount()
 	if err != nil {
-		return 
+		return
+
 	}
 
 	
