@@ -1,6 +1,6 @@
 package campaigns
 
-var ComplaintPrefix = "cmplt"
+var CampaignPrefix = "campn"
 
 type Campaign struct {
 	//gorm.Model
