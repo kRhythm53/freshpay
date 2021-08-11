@@ -23,12 +23,12 @@ func GetPaymentByTimeFromDB(payments *[]Payments, startTime int64, endTime int64
 		if err = config.DB.Table("payments").Where("created_at > ? AND created_at < ? AND source_id = ?", startTime, endTime, WalletID).Find(payments).Error; err != nil {
 			return errors.New("payment not found")
 		}
-	} else if TransactionType == "credit"{
+	} else if TransactionType == "credit" {
 		if err = config.DB.Table("payments").Where("created_at > ? AND created_at < ? AND destination_id = ?", startTime, endTime, WalletID).Find(payments).Error; err != nil {
 			return errors.New("payment not found")
 		}
-	} else{
-		if err = config.DB.Table("payments").Where("created_at > ? AND created_at < ? ", startTime, endTime).Find(payments).Error; err != nil {
+	} else {
+		if err = config.DB.Table("payments").Where("created_at > ? AND created_at < ? AND (source_id = ? OR destination_id = ?)", startTime, endTime, WalletID, WalletID).Find(payments).Error; err != nil {
 			return errors.New("payment not found")
 		}
 	}
@@ -36,7 +36,7 @@ func GetPaymentByTimeFromDB(payments *[]Payments, startTime int64, endTime int64
 }
 
 func UpdatePaymentToDB(payment *Payments) (err error) {
-	if err=config.DB.Table("payments").Save(payment).Error;err!=nil{
+	if err = config.DB.Table("payments").Save(payment).Error; err != nil {
 		return errors.New("failed to update payment")
 	}
 	return nil

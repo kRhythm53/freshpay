@@ -18,7 +18,7 @@ func InitiateTransaction(){
 				if strings.HasPrefix(payment.DestinationId, constants.BankPrefix){
 					var Bank bank.Detail
 					var Wallet wallet.Detail
-					err := bank.GetBankById(&Bank, payment.DestinationId)
+					err = bank.GetBankById(&Bank, payment.DestinationId)
 					if err != nil {
 						return
 					}
@@ -56,22 +56,22 @@ func AddTransactions(payment *payments.Payments,direction string) (err error) {
 	if direction=="to razorpay account"{
 		transaction.SourceId=payment.SourceId
 		transaction.DestinationId=constants.RzpWalletID
-		if strings.HasPrefix(transaction.SourceId, constants.WalletPrefix){
-			wallet.UpdateWalletBalance(transaction.SourceId,-1*transaction.Amount)
-		}
-	}else{
+	}else if direction=="from razorpay account"{
 		transaction.SourceId=constants.RzpWalletID
 		transaction.DestinationId=payment.DestinationId
-		if strings.HasPrefix(transaction.DestinationId, constants.WalletPrefix){
-			//fmt.Println(transaction.DestinationId,transaction.Amount)
-			wallet.UpdateWalletBalance(transaction.DestinationId,transaction.Amount)
-		}
 	}
+
 	transaction.Type=payment.Type
 	transaction.Status="processed"
 	transaction.PaymentsId=payment.ID
 	transaction.CreatedAt=time.Now().Unix()
 	transaction.UpdatedAt=time.Now().Unix()
+	if strings.HasPrefix(transaction.SourceId, constants.WalletPrefix){
+		wallet.UpdateWalletBalance(transaction.SourceId,-1*transaction.Amount)
+	}
+	if strings.HasPrefix(transaction.DestinationId, constants.WalletPrefix){
+		wallet.UpdateWalletBalance(transaction.DestinationId,transaction.Amount)
+	}
 	return AddTransactionToDB(transaction)
 }
 
