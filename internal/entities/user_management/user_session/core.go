@@ -28,6 +28,6 @@ func GetSessionById(session *Detail, id string) (err error) {
 
 //GetActiveSessionByUserId will return active session for that user
 func GetActiveSessionByUserId(session *Detail,user_id string)(err error){
-	err=config.DB.Where("user_id = ? AND expire_time >= ?", user_id, int(time.Now().Unix()-ExpireTime)).First(&session).Error
+	err=config.DB.Where("user_id = ? AND expire_time >= ?", user_id, time.Now().Unix()).First(&session).Error
 	return err
 }

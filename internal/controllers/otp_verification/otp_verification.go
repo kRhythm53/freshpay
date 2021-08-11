@@ -47,7 +47,7 @@ func VerifyOTPAdmin(c *gin.Context){
 			c.JSON(http.StatusOK, gin.H{
 				"Entity":admin.EntityName,
 				"Status":"Success",
-				"Message":"User Account Registered Succesfully",
+				"Message":"Admin Account Registered Succesfully",
 				"PhoneNumber":otp.PhoneNumber,
 			})
 		}

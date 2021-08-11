@@ -25,7 +25,7 @@ func SignUp(c *gin.Context) {
 
 	} else {
 		c.JSON(http.StatusOK, gin.H{
-			"Entity":user.EntityName,
+			"Entity":admin.EntityName,
 			"Status":"success",
 			"ID":Admin.ID,
 			"Name":Admin.Name,
