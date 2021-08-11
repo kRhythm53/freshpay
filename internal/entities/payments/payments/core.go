@@ -6,11 +6,11 @@ import (
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/campaigns"
-	"github.com/freshpay/internal/entities/payments/utilities"
 	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/freshpay/internal/entities/user_management/beneficiary"
 	"github.com/freshpay/internal/entities/user_management/user"
 	"github.com/freshpay/internal/entities/user_management/wallet"
+	utilities2 "github.com/freshpay/utilities"
 	"strconv"
 	"strings"
 	"sync"
@@ -34,14 +34,17 @@ var mutex = &sync.Mutex{}
 func AddPayments(payment *Payments, userId string) (err error) {
 	payment.Type = GetPaymentType(payment)
 	payment.Status = "processing"
-	payment.ID = utilities.RandomString(constants.IDLength, constants.PaymentPrefix)
+	payment.ID = utilities2.RandomString(constants.IDLength, constants.PaymentPrefix)
 	err = ValidityCheck(payment, userId)
 	if err != nil {
 		return err
 	}
+	err = AddPaymentToDB(payment)
+	if err != nil {
+		return err
+	}
 	InputPaymentsChannel <- payment
-
-	return AddPaymentToDB(payment)
+	return nil
 }
 
 // GetPaymentByID :Get payment for the given payment id
@@ -140,6 +143,17 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 	if payment.Amount < 0 {
 		return errors.New("payment amount invalid")
 	}
+
+	if err = SourceValidityCheck(payment, userId);err != nil {
+		return err
+	}
+	if err = DestinationValidityCheck(payment, userId);err != nil {
+		return err
+	}
+
+	return nil
+}
+func SourceValidityCheck(payment *Payments, userId string)(err error){
 	var balance int
 	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix) {
 		var Source wallet.Detail
@@ -166,6 +180,10 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 	} else {
 		return errors.New("invalid source")
 	}
+	return nil
+}
+
+func DestinationValidityCheck(payment *Payments, userId string)(err error){
 	if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix) {
 		var Destination wallet.Detail
 		err = wallet.GetWalletById(&Destination, payment.DestinationId)
@@ -187,10 +205,8 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 	} else {
 		return errors.New("invalid destination")
 	}
-
 	return nil
 }
-
 // InitiateRefund :A refund is initiated by Admin for given payment id and user id
 func InitiateRefund(paymentID string, UserID string) (RefundID string, err error) {
 	var RefundPayment Payments
@@ -206,18 +222,18 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 		return "", err
 	}
 
-	RefundPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
+	RefundPayment.ID = utilities2.RandomString(14, constants.PaymentPrefix)
 	RefundPayment.Amount = payment.Amount
 	RefundPayment.Currency = "INR"
 	RefundPayment.SourceId = constants.RzpWalletID
 	RefundPayment.DestinationId = RefundWallet.ID
 	RefundPayment.Type = "Refund"
 	RefundPayment.Status = "processing"
-	InputPaymentsChannel <- &RefundPayment
 	err = AddPaymentToDB(&RefundPayment)
 	if err != nil {
 		return "", err
 	}
+	InputPaymentsChannel <- &RefundPayment
 	return RefundPayment.ID, nil
 }
 
@@ -243,7 +259,7 @@ func InitiateCashback(payment *Payments) (err error) {
 	Cashback := campaigns.Eligibility(payment.CreatedAt, payment.Amount, userID)
 	if Cashback > 0 {
 		var CashbackPayment Payments
-		CashbackPayment.ID = utilities.RandomString(constants.IDLength, constants.PaymentPrefix)
+		CashbackPayment.ID = utilities2.RandomString(constants.IDLength, constants.PaymentPrefix)
 		CashbackPayment.Amount = int64(Cashback)
 		CashbackPayment.Currency = "INR"
 		CashbackPayment.SourceId = constants.RzpWalletID

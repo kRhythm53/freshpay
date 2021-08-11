@@ -6,7 +6,7 @@ import (
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/OTP"
 	"github.com/freshpay/internal/entities/admin/admin_session"
-	"github.com/freshpay/internal/entities/user_management/utilities"
+	utilities2 "github.com/freshpay/utilities"
 )
 
 
@@ -20,7 +20,7 @@ func SignUp(admin *Detail) (err error){
 		err=errors.New("phone number should be 10 digit long")
 		return err
 	}
-	if !utilities.IsNumeric(phoneNumber){
+	if !utilities2.IsNumeric(phoneNumber){
 		err=errors.New("Phone number can contain characters 0-9")
 		return err
 	}
@@ -50,7 +50,7 @@ func SignUp(admin *Detail) (err error){
 	 Encrypt the password
 	*/
 	var passwordHash string
-	err=utilities.GetEncryption(admin.Password,&passwordHash)
+	err= utilities2.GetEncryption(admin.Password,&passwordHash)
 	if err!=nil{
 		return err
 	}
@@ -58,7 +58,7 @@ func SignUp(admin *Detail) (err error){
 
 
 	//now create the admin
-	admin.ID=utilities.CreateID(Prefix,IDLengthExcludingPrefix)
+	admin.ID= utilities2.CreateID(Prefix,IDLengthExcludingPrefix)
 
 	if err=config.DB.Create(admin).Error; err!=nil{
 		return err
@@ -100,7 +100,7 @@ func LoginByPassword(phoneNumber string, password string, Session *admin_session
 			*/
 			return err
 		}
-		if !utilities.MatchPassword(password,admin.Password) {
+		if !utilities2.MatchPassword(password,admin.Password) {
 			err = errors.New("Password is Wrong")
 		} else {
 			err=admin_session.GetActiveSessionByAdminId(Session,admin.ID)

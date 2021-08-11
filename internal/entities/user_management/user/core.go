@@ -6,8 +6,8 @@ import (
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/OTP"
 	"github.com/freshpay/internal/entities/user_management/user_session"
-	"github.com/freshpay/internal/entities/user_management/utilities"
 	"github.com/freshpay/internal/entities/user_management/wallet"
+	utilities2 "github.com/freshpay/utilities"
 
 	//"github.com/freshpay/internal/entities/user_management/wallet"
 )
@@ -26,7 +26,7 @@ func SignUp(user *Detail) (err error) {
 		err=errors.New("phone number should be 10 digit long")
 		return err
 	}
-	if !utilities.IsNumeric(phoneNumber){
+	if !utilities2.IsNumeric(phoneNumber){
 		err=errors.New("Phone number can contain characters 0-9")
 		return err
 	}
@@ -49,13 +49,13 @@ func SignUp(user *Detail) (err error) {
 		return err
 	}
 	user.IsVerified=false
-	user.ID = utilities.CreateID(Prefix, IDLengthExcludingPrefix)
+	user.ID = utilities2.CreateID(Prefix, IDLengthExcludingPrefix)
 
 	/*
 	 Encrypt the password
 	 */
 	var passwordHash string
-	err=utilities.GetEncryption(user.Password,&passwordHash)
+	err= utilities2.GetEncryption(user.Password,&passwordHash)
 	if err!=nil{
 		return err
 	}
@@ -117,7 +117,7 @@ func LoginByPassword(phoneNumber string, password string, Session *user_session.
 			*/
 			return err
 		}
-		if  !utilities.MatchPassword(password,user.Password){
+		if  !utilities2.MatchPassword(password,user.Password){
 			err = errors.New("Password is Wrong")
 		} else {
 			err=user_session.GetActiveSessionByUserId(Session,user.ID)

@@ -6,3 +6,15 @@ type Model struct {
 	UpdatedAt int64  `json:"updated_at"`
 	//DeletedAt int64
 }
+
+type Error struct {
+	Code        string
+	Description string
+	Source      string
+	Reason      string
+	Step        string
+	Metadata    string
+}
+type Failure struct {
+	Error Error
+}

@@ -2,8 +2,8 @@ package campaigns
 
 import (
 	"fmt"
-	"github.com/freshpay/internal/entities/payments/utilities"
 	"github.com/freshpay/internal/entities/user_management/user"
+	utilities2 "github.com/freshpay/utilities"
 	"math"
 )
 
@@ -12,7 +12,7 @@ func GetAllCampaigns(campaign *[]Campaign) (err error) {
 }
 
 func CreateCampaign(campaign *Campaign) (err error) {
-	campaign.ID = utilities.RandomString(14, CampaignPrefix)
+	campaign.ID = utilities2.RandomString(14, CampaignPrefix)
 	return CreateCampaignToDB(campaign)
 }
 

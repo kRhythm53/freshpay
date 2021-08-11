@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/freshpay/internal/config"
-	"github.com/freshpay/internal/entities/user_management/utilities"
+	utilities2 "github.com/freshpay/utilities"
 )
 
 //CreateBank will create a new bank
@@ -19,7 +19,7 @@ func CreateBank(bank *Detail, userId string) (err error) {
 		err=errors.New("Number of characters in IFSCCode should be 11")
 		return err
 	}
-	bank.ID = utilities.CreateID(Prefix, IDLengthExcludingPrefix)
+	bank.ID = utilities2.CreateID(Prefix, IDLengthExcludingPrefix)
 	bank.UserId = userId
 	fmt.Println("banK: ", bank)
 	if err = config.DB.Create(bank).Error; err != nil {

@@ -1,7 +1,7 @@
 package payments
 
 import (
-	"github.com/freshpay/internal/constants"
+	"github.com/freshpay/internal/base"
 	"github.com/freshpay/internal/entities/payments/payments"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -21,7 +21,7 @@ func AddPayments(c *gin.Context) {
 	userId :=c.GetString("userId")
 	err = payments.AddPayments(&payment,userId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest,constants.Failure{Error: constants.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
+		c.JSON(http.StatusBadRequest,base.Failure{Error: base.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
 	} else {
 		resp:= Response{Entity: "payments",Payment: payment}
 		c.JSON(http.StatusOK, resp)
@@ -33,8 +33,7 @@ func GetPaymentByID(c *gin.Context) {
 	id := c.Params.ByName("payments_id")
 	err := payments.GetPaymentByID(&payment, id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest,constants.Failure{Error: constants.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
-	} else {
+		c.JSON(http.StatusBadRequest,base.Failure{Error: base.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
 		resp:= Response{Entity: "payments",Payment: payment}
 		c.JSON(http.StatusOK, resp)
 	}
@@ -48,7 +47,7 @@ func GetPaymentsByTime(c *gin.Context) {
 	userId := c.GetString("userId")
 	err := payments.GetPaymentsByTime(&payment, from, to, TransactionType, userId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest,constants.Failure{Error: constants.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
+		c.JSON(http.StatusBadRequest,base.Failure{Error: base.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
 	} else {
 		resp := make([]Response, len(payment))
 		for i,payment := range payment{

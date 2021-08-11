@@ -3,7 +3,7 @@ package beneficiary
 import (
 	"errors"
 	"github.com/freshpay/internal/config"
-	"github.com/freshpay/internal/entities/user_management/utilities"
+	utilities2 "github.com/freshpay/utilities"
 )
 
 //CreateBeneficiary will create a new beneficiary
@@ -16,7 +16,7 @@ func CreateBeneficiary(beneficiary *Detail,userId string)(err error){
 		err=errors.New("Number of characters in IFSCCode should be 11")
 		return err
 	}
-	beneficiary.ID=utilities.CreateID(Prefix, IDLengthExcludingPrefix)
+	beneficiary.ID= utilities2.CreateID(Prefix, IDLengthExcludingPrefix)
 	beneficiary.UserId=userId
 	if err=config.DB.Create(beneficiary).Error; err!=nil{
 		return err

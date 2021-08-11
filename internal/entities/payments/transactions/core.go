@@ -3,9 +3,9 @@ package transactions
 import (
 	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/payments/payments"
-	"github.com/freshpay/internal/entities/payments/utilities"
 	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/freshpay/internal/entities/user_management/wallet"
+	"github.com/freshpay/utilities"
 	"strings"
 	"time"
 )
@@ -13,7 +13,7 @@ func InitiateTransaction(){
 	for {
 		select {
 		case payment:=<-payments.InputPaymentsChannel:
-			var err,err2 error
+			var err error
 			if payment.Type=="Cashback" || payment.Type=="Refund"{
 				if strings.HasPrefix(payment.DestinationId, constants.BankPrefix){
 					var Bank bank.Detail
@@ -28,16 +28,16 @@ func InitiateTransaction(){
 					}
 					payment.DestinationId=Wallet.ID
 				}
-				err=AddTransactions(payment,"from razorpay account")
+				err=AddTransactions(payment,constants.RzpWalletID,payment.DestinationId)
 				if err != nil {
 					payment.Status="failed"
 				}else{
 					payment.Status="processed"
 				}
 			}else{
-				err = AddTransactions(payment, "to razorpay account")
-				err2 = AddTransactions(payment,"from razorpay account")
-				if err != nil || err2!=nil{
+				if err = AddTransactions(payment, payment.SourceId,constants.RzpWalletID);err !=nil{
+					payment.Status="failed"
+				}else if err = AddTransactions(payment,constants.RzpWalletID,payment.DestinationId);err !=nil{
 					payment.Status="failed"
 				}else{
 					payment.Status="processed"
@@ -48,18 +48,14 @@ func InitiateTransaction(){
 	}
 }
 
-func AddTransactions(payment *payments.Payments,direction string) (err error) {
+func AddTransactions(payment *payments.Payments,sourceID string, destinationID string) (err error) {
 	var transaction Transactions
-	transaction.ID= utilities.RandomString(14,constants.TransactionPrefix)
+	transaction.ID= utilities.RandomString(constants.IDLength,constants.TransactionPrefix)
 	transaction.Amount=payment.Amount
 	transaction.Currency=payment.Currency
-	if direction=="to razorpay account"{
-		transaction.SourceId=payment.SourceId
-		transaction.DestinationId=constants.RzpWalletID
-	}else if direction=="from razorpay account"{
-		transaction.SourceId=constants.RzpWalletID
-		transaction.DestinationId=payment.DestinationId
-	}
+
+	transaction.SourceId=sourceID
+	transaction.DestinationId=destinationID
 
 	transaction.Type=payment.Type
 	transaction.Status="processed"
