@@ -1,15 +1,15 @@
 package middleware
 
 import (
+	"github.com/freshpay/internal/entities/Error"
 	"github.com/freshpay/internal/entities/admin/admin_session"
 	"github.com/freshpay/internal/entities/user_management/user_session"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"strings"
 	"time"
 )
 
-var noSessionIdPath = []string{
+var PublicPath = []string{
 	"/users/signup",
 	"/users/signin",
 	"/admin/signup",
@@ -19,9 +19,8 @@ var noSessionIdPath = []string{
 	"/wallet/:phone_number",
 }
 
-func isNoSessionIdPath(Path string) bool {
-
-	for _, path := range noSessionIdPath {
+func isPublicPath(Path string) bool {
+	for _, path := range PublicPath {
 		if Path == path {
 			return true
 		}
@@ -50,7 +49,7 @@ var adminPath = []string{
 }
 
 /*
-	return if a method belongs to user or not
+	return if a path belongs to user or not
 */
 func isUserPath(Path string) bool {
 	for _, path := range userPath {
@@ -62,7 +61,7 @@ func isUserPath(Path string) bool {
 }
 
 /*
-return if a method belongs to admin or not
+return if a path belongs to admin or not
 */
 func isAdminPath(Path string) bool {
 	for _, path := range adminPath {
@@ -74,130 +73,114 @@ func isAdminPath(Path string) bool {
 }
 
 func Authenticate(c *gin.Context) {
-	if isNoSessionIdPath(c.FullPath()) {
+	if isPublicPath(c.FullPath()) {
 		c.Next()
 		return
 	}
-	if len(c.Request.Header["Session_id"])==0{
-		c.JSON(401, gin.H{
-			"Code": "BAD_REQUEST_ERROR",
-			"Status":"Failed",
-			"Description":"Invalid Session Id,Please Sign in Again",
-			"Source": "business",
-			"Reason": "No Session Id in headers",
-			"Step": "NA",
-			"Metadata":"{}",
+
+	sessionId:=ExtractSessionIdFromHeaders(c)
+
+	if sessionId==""{
+		c.JSON(401, Error.Detail{
+			"BAD_REQUEST_ERROR","Failed","Invalid Session Id,Please Sign in Again",
+			"business","No Session Id in headers","NA","{}",
 		})
 		c.Abort()
 		return
 	}
-	sessionId := c.Request.Header["Session_id"][0]
-	if len(sessionId) <user_session.IDLengthExcludingPrefix{
-		c.JSON(401, gin.H{
-			"Code": "BAD_REQUEST_ERROR",
-			"Status":"Failed",
-			"Description":"Invalid Session Id,Please Sign in Again",
-			"Source": "business",
-			"Reason": "Invalid Session ID",
-			"Step": "NA",
-			"Metadata":"{}",
-		})
-		c.Abort()
-		return
-	}
+
 	//if sessionId belongs to user
 	sender := strings.Split(sessionId, "_")[0]
-	if sender == user_session.Prefix {
-		if !isUserPath(c.FullPath()) {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"Code": "Unauthorized",
-				"Status":"Failed",
-				"Description":"Access Denied",
-				"Source": "business",
-				"Reason": "Path is not Authorized",
-				"Step": "NA",
-				"Metadata":"{}",
-			})
-			c.Abort()
-		}else{
-			var Session user_session.Detail
-			err1 := user_session.GetSessionById(&Session, sessionId)
-			if err1 != nil {
-				c.JSON(403, gin.H{
-					"Code": "Unauthorized",
-					"Status":"Failed",
-					"Description":"Session Id is invalid, Please Signin Again",
-					"Source": "business",
-					"Reason": "Session Id is invalid",
-					"Step": "NA",
-					"Metadata":"{}",
-				})
-				c.Abort()
-				return
-			} else if Session.ExpireTime < uint64(time.Now().Unix()) {
-				c.JSON(403, gin.H{
-					"Code": "Unauthorized",
-					"Status":"Failed",
-					"Description":"Session has expired, Please Signin Again",
-					"Source": "business",
-					"Reason": "Session has expired",
-					"Step": "NA",
-					"Metadata":"{}",
-				})
-				c.Abort()
-				return
-			}else{
-				userId := Session.UserId
-				c.Set("userId", userId)
-				c.Next()
-			}
-		}
-	} else if sender == admin_session.Prefix {
-		if !isAdminPath(c.FullPath()) {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"Code": "Unauthorized",
-				"Status":"Failed",
-				"Description":"Access Denied",
-				"Source": "business",
-				"Reason": "Path is not Authorized",
-				"Step": "NA",
-				"Metadata":"{}",
-			})
-			c.Abort()
-		} else{
-			var Session admin_session.Detail
-			err1 := admin_session.GetSessionById(&Session, sessionId)
-			if err1 != nil {
-				c.JSON(403, gin.H{
-					"Code": "Unauthorized",
-					"Status":"Failed",
-					"Description":"Session Id is invalid, Please Signin Again",
-					"Source": "business",
-					"Reason": "Session Id is invalid",
-					"Step": "NA",
-					"Metadata":"{}",
-				})
-				c.Abort()
-				return
-			} else if Session.ExpireTime < uint64(time.Now().Unix()) {
-				c.JSON(403, gin.H{
-					"Code": "Unauthorized",
-					"Status":"Failed",
-					"Description":"Session has expired, Please Signin Again",
-					"Source": "business",
-					"Reason": "Session has expired",
-					"Step": "NA",
-					"Metadata":"{}",
-				})
-				c.Abort()
-				return
-			} else{
-				adminId := Session.AdminId
-				c.Set("adminId", adminId)
-				c.Next()
-			}
-		}
-
+	err:=ValidatePath(sender,c.FullPath())
+	if err!=nil{
+		c.JSON(401,&err)
+		c.Abort()
+		return
 	}
 
+	if sender == user_session.Prefix {
+		var Session user_session.Detail
+		err=ValidateUserSessionId(sessionId,&Session)
+		if err!=nil {
+			c.JSON(401,&err)
+			c.Abort()
+			return
+		}
+
+		//set the user Id to gin.Context
+		userId := Session.UserId
+		c.Set("userId", userId)
+		c.Next()
+	} else if sender == admin_session.Prefix {
+		var Session admin_session.Detail
+		err=ValidateAdminSessionId(sessionId,&Session)
+		if err!=nil {
+			c.JSON(401,&err)
+			c.Abort()
+			return
+		}
+
+		//set admin Id to gin.Context
+		adminId := Session.AdminId
+		c.Set("adminId", adminId)
+		c.Next()
+	}
+
+}
+func ExtractSessionIdFromHeaders(c *gin.Context) string{
+	header:= c.Request.Header["Session_id"] //S of Session_id has to be capital
+	if len(header)==0{
+		return ""
+	}
+	return header[0]
+}
+
+func ValidatePath(sender string,Path string)  *Error.Detail{
+	if (sender==user_session.Prefix && isUserPath(Path)) ||(sender==admin_session.Prefix && isAdminPath(Path)){
+		return nil
+	}
+	err:=Error.Detail{
+		"Unauthorized","Failed","Path is not Authorized",
+		"business","Access Denied","NA","{}",
+	}
+	return &err
+}
+func ValidateUserSessionId(sessionId string,Session *user_session.Detail) *Error.Detail{
+	var err error
+	err=user_session.GetSessionById(Session,sessionId)
+	if err!=nil{
+		return &Error.Detail{
+			"UnAuthorized","Failed",err.Error(),
+			"business","Session Id is Invalid","NA","{}",
+		}
+	}
+
+	//checking that session hasn't expired
+	if Session.ExpireTime < uint64(time.Now().Unix()){
+		return &Error.Detail{
+			"UnAuthorized","Failed","Session has expired, Please Sign in Again",
+			"business","Session has expired","NA","{}",
+		}
+	}
+	return nil
+}
+
+func ValidateAdminSessionId(sessionId string,Session *admin_session.Detail) *Error.Detail{
+	var err error
+	err=admin_session.GetSessionById(Session,sessionId)
+	if err!=nil{
+		return &Error.Detail{
+			"UnAuthorized","Failed",err.Error(),
+			"business","Session Id is Invalid","NA","{}",
+		}
+	}
+
+	//checking that session hasn't expired
+	if Session.ExpireTime < uint64(time.Now().Unix()){
+		return &Error.Detail{
+			"UnAuthorized","Failed","Session has expired, Please Sign in Again",
+			"business","Session has expired","NA","{}",
+		}
+	}
+	return nil
 }
