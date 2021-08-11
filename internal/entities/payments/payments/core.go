@@ -10,7 +10,7 @@ import (
 	"github.com/freshpay/internal/entities/user_management/beneficiary"
 	"github.com/freshpay/internal/entities/user_management/user"
 	"github.com/freshpay/internal/entities/user_management/wallet"
-	utilities2 "github.com/freshpay/utilities"
+	"github.com/freshpay/utilities"
 	"strconv"
 	"strings"
 	"sync"
@@ -25,7 +25,6 @@ import (
 // Check if the payment is eligible for a cashback, if yes a cashback is initiated by simply adding a payment request to InputPaymentChannel
 // Admin can initiate by refund by initiating a payment to InputPaymentChannel
 
-
 var InputPaymentsChannel = make(chan *Payments, 1000)
 var ResultsPaymentsChannel = make(chan *Payments, 1000)
 var mutex = &sync.Mutex{}
@@ -34,7 +33,7 @@ var mutex = &sync.Mutex{}
 func AddPayments(payment *Payments, userId string) (err error) {
 	payment.Type = GetPaymentType(payment)
 	payment.Status = "processing"
-	payment.ID = utilities2.RandomString(constants.IDLength, constants.PaymentPrefix)
+	payment.ID = utilities.RandomString(constants.IDLength, constants.PaymentPrefix)
 	err = ValidityCheck(payment, userId)
 	if err != nil {
 		return err
@@ -81,7 +80,13 @@ func GetPaymentsByTime(payments *[]Payments, from string, to string, Transaction
 		return errors.New("could not fetch wallet details")
 	}
 
-	return GetPaymentByTimeFromDB(payments, startTime, endTime, TransactionType, Wallet.ID)
+	if TransactionType == "credit" {
+		return GetPaymentByTimeCreditFromDB(payments, startTime, endTime, Wallet.ID)
+	} else if TransactionType == "debit" {
+		return GetPaymentByTimeDebitFromDB(payments, startTime, endTime, Wallet.ID)
+	} else {
+		return GetPaymentByTimeFromDB(payments, startTime, endTime, Wallet.ID)
+	}
 }
 
 // PaymentReceiver : A receiver go routine after all transactions have been completed
@@ -144,16 +149,17 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 		return errors.New("payment amount invalid")
 	}
 
-	if err = SourceValidityCheck(payment, userId);err != nil {
+	if err = SourceValidityCheck(payment, userId); err != nil {
 		return err
 	}
-	if err = DestinationValidityCheck(payment, userId);err != nil {
+	if err = DestinationValidityCheck(payment, userId); err != nil {
 		return err
 	}
 
 	return nil
 }
-func SourceValidityCheck(payment *Payments, userId string)(err error){
+
+func SourceValidityCheck(payment *Payments, userId string) (err error) {
 	var balance int
 	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix) {
 		var Source wallet.Detail
@@ -183,7 +189,7 @@ func SourceValidityCheck(payment *Payments, userId string)(err error){
 	return nil
 }
 
-func DestinationValidityCheck(payment *Payments, userId string)(err error){
+func DestinationValidityCheck(payment *Payments, userId string) (err error) {
 	if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix) {
 		var Destination wallet.Detail
 		err = wallet.GetWalletById(&Destination, payment.DestinationId)
@@ -207,6 +213,7 @@ func DestinationValidityCheck(payment *Payments, userId string)(err error){
 	}
 	return nil
 }
+
 // InitiateRefund :A refund is initiated by Admin for given payment id and user id
 func InitiateRefund(paymentID string, UserID string) (RefundID string, err error) {
 	var RefundPayment Payments
@@ -222,7 +229,7 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 		return "", err
 	}
 
-	RefundPayment.ID = utilities2.RandomString(14, constants.PaymentPrefix)
+	RefundPayment.ID = utilities.RandomString(constants.IDLength, constants.PaymentPrefix)
 	RefundPayment.Amount = payment.Amount
 	RefundPayment.Currency = "INR"
 	RefundPayment.SourceId = constants.RzpWalletID
@@ -259,7 +266,7 @@ func InitiateCashback(payment *Payments) (err error) {
 	Cashback := campaigns.Eligibility(payment.CreatedAt, payment.Amount, userID)
 	if Cashback > 0 {
 		var CashbackPayment Payments
-		CashbackPayment.ID = utilities2.RandomString(constants.IDLength, constants.PaymentPrefix)
+		CashbackPayment.ID = utilities.RandomString(constants.IDLength, constants.PaymentPrefix)
 		CashbackPayment.Amount = int64(Cashback)
 		CashbackPayment.Currency = "INR"
 		CashbackPayment.SourceId = constants.RzpWalletID
