@@ -21,11 +21,11 @@ var InputPaymentsChannel = make(chan *Payments, 1000)
 var ResultsPaymentsChannel = make(chan *Payments, 1000)
 var mutex = &sync.Mutex{}
 
-func AddPayments(payment *Payments,userId string) (err error) {
+func AddPayments(payment *Payments, userId string) (err error) {
 	payment.Type = GetPaymentType(payment)
 	payment.Status = "processing"
 	payment.ID = utilities.RandomString(14, constants.PaymentPrefix)
-	err = ValidityCheck(payment,userId)
+	err = ValidityCheck(payment, userId)
 	if err != nil {
 		return err
 	}
@@ -74,13 +74,20 @@ func UpdatePayment(payment *Payments) (err error) {
 	if err != nil {
 		return errors.New("could not update transaction count")
 	}
+	err = UpdatePaymentToDB(payment)
+	if err != nil {
+		return err
+	}
+	//fmt.Println("check1")
+	//fmt.Println(payment)
 	if payment.Type != "Cashback" && payment.Type != "Refund" {
 		err = InitiateCashback(payment)
+		//fmt.Println("check2")
 		if err != nil {
 			return err
 		}
 	}
-	return UpdatePaymentToDB(payment)
+	return nil
 }
 
 func PaymentReceiver() {
@@ -107,7 +114,7 @@ func GetPaymentType(payment *Payments) string {
 	}
 }
 
-func ValidityCheck(payment *Payments,userId string) (err error) {
+func ValidityCheck(payment *Payments, userId string) (err error) {
 	if payment.Amount < 0 {
 		return errors.New("payment amount invalid")
 	}
@@ -118,23 +125,23 @@ func ValidityCheck(payment *Payments,userId string) (err error) {
 		if err != nil {
 			return errors.New("source wallet does not exist")
 		}
-		if Source.UserId!=userId{
+		if Source.UserId != userId {
 			return errors.New("source wallet does not belong to user")
 		}
 		balance = Source.Balance
 		if balance < int(payment.Amount) {
 			return errors.New("low wallet balance")
 		}
-	} else if strings.HasPrefix(payment.SourceId, constants.BankPrefix){
+	} else if strings.HasPrefix(payment.SourceId, constants.BankPrefix) {
 		var Source bank.Detail
 		err := bank.GetBankById(&Source, payment.SourceId)
 		if err != nil {
 			return errors.New("source bank account does not exist")
 		}
-		if Source.UserId!=userId{
+		if Source.UserId != userId {
 			return errors.New("source bank does not belong to user")
 		}
-	}else{
+	} else {
 		return errors.New("invalid source")
 	}
 	if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix) {
@@ -143,19 +150,19 @@ func ValidityCheck(payment *Payments,userId string) (err error) {
 		if err != nil {
 			return errors.New("destination wallet does not exist")
 		}
-	} else if strings.HasPrefix(payment.DestinationId, constants.BankPrefix){
+	} else if strings.HasPrefix(payment.DestinationId, constants.BankPrefix) {
 		var Destination bank.Detail
 		err := bank.GetBankById(&Destination, payment.DestinationId)
 		if err != nil {
 			return errors.New("destination bank account does not exist")
 		}
-	} else if strings.HasPrefix(payment.DestinationId, constants.BeneficiaryPrefix){
+	} else if strings.HasPrefix(payment.DestinationId, constants.BeneficiaryPrefix) {
 		var Destination beneficiary.Detail
 		err := beneficiary.GetBeneficiaryById(&Destination, payment.DestinationId)
 		if err != nil {
 			return errors.New("destination bank account does not exist as beneficiary")
 		}
-	}else{
+	} else {
 		return errors.New("invalid destination")
 	}
 
@@ -209,6 +216,7 @@ func InitiateCashback(payment *Payments) (err error) {
 		userID = Source.UserId
 	}
 	Cashback := campaigns.Eligibility(payment.CreatedAt, payment.Amount, userID)
+	//fmt.Println("check3")
 	if Cashback > 0 {
 		var CashbackPayment Payments
 		CashbackPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
@@ -218,6 +226,7 @@ func InitiateCashback(payment *Payments) (err error) {
 		CashbackPayment.DestinationId = payment.SourceId
 		CashbackPayment.Type = "Cashback"
 		CashbackPayment.Status = "processing"
+		//fmt.Println("check4")
 		InputPaymentsChannel <- &CashbackPayment
 		return AddPaymentToDB(&CashbackPayment)
 	}
@@ -264,20 +273,20 @@ func CreateRzpAccount() (err error) {
 		RZP.Name = constants.RazorpayName
 		RZP.Password = constants.RazorpayPassword
 		RZP.PhoneNumber = constants.RazorpayPhoneNumber
+		RZP.IsVerified = true
 		err = user.SignUp(&RZP)
 		if err != nil {
 			return err
 		}
-		var RZPWallet wallet.Detail
-		err = wallet.GetWalletByUserId(&RZPWallet, RZP.ID)
-		if err != nil {
-			return err
-		}
-		constants.RzpWalletID = RZPWallet.ID
-		wallet.UpdateWalletBalance(constants.RzpWalletID, 10000000000)
-		return nil
-	}else{
+	} else {
 		fmt.Println("Razorpay wallet already exists")
 	}
+	var RZPWallet wallet.Detail
+	err = wallet.GetWalletByUserId(&RZPWallet, RZP.ID)
+	if err != nil {
+		return err
+	}
+	constants.RzpWalletID = RZPWallet.ID
+	wallet.UpdateWalletBalance(constants.RzpWalletID, 10000000000)
 	return nil
 }

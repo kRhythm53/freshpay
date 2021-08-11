@@ -4,6 +4,7 @@ import (
 	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/payments/payments"
 	"github.com/freshpay/internal/entities/payments/utilities"
+	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/freshpay/internal/entities/user_management/wallet"
 	"strings"
 	"time"
@@ -14,6 +15,19 @@ func InitiateTransaction(){
 		case payment:=<-payments.InputPaymentsChannel:
 			var err,err2 error
 			if payment.Type=="Cashback" || payment.Type=="Refund"{
+				if strings.HasPrefix(payment.DestinationId, constants.BankPrefix){
+					var Bank bank.Detail
+					var Wallet wallet.Detail
+					err := bank.GetBankById(&Bank, payment.DestinationId)
+					if err != nil {
+						return
+					}
+					err = wallet.GetWalletByUserId(&Wallet, Bank.UserId)
+					if err != nil {
+						return
+					}
+					payment.DestinationId=Wallet.ID
+				}
 				err=AddTransactions(payment,"from razorpay account")
 				if err != nil {
 					payment.Status="failed"
@@ -49,6 +63,7 @@ func AddTransactions(payment *payments.Payments,direction string) (err error) {
 		transaction.SourceId=constants.RzpWalletID
 		transaction.DestinationId=payment.DestinationId
 		if strings.HasPrefix(transaction.DestinationId, constants.WalletPrefix){
+			//fmt.Println(transaction.DestinationId,transaction.Amount)
 			wallet.UpdateWalletBalance(transaction.DestinationId,transaction.Amount)
 		}
 	}
