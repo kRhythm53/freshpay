@@ -20,9 +20,9 @@ func BuildDBConfig() *DBConfig {
 		Host:     "localhost",
 		Port:     3306,
 		User:     "root",
-		Password: "Chr1145815@IITBHU",
-		//Password: "12345678",
-		DBName: "freshpayDB2",
+		//Password: "sqlPass123",
+		Password: "12345678",
+		DBName: "freshpayDB",
 	}
 	return &dbConfig
 }
