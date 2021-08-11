@@ -28,12 +28,17 @@ func UpdateComplaintById(c *gin.Context) {
 	var Complaint complaints.Complaint
 	id := c.Params.ByName("complaint_id")
 	refund := c.Query("refund")
+	adminId := c.GetString("adminId")
+	println(adminId)
 	err := complaints.GetComplaintByID(&Complaint, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, Complaint)
 	} else{
-		c.BindJSON(&Complaint)
-		err = complaints.UpdateComplaint(&Complaint, id, refund)
+		err := c.BindJSON(&Complaint)
+		if err != nil {
+			println("problem with BindJson")
+		}
+		err = complaints.UpdateComplaint(&Complaint, id, refund,adminId)
 		if err != nil {
 			c.AbortWithStatus(http.StatusNotFound)
 		} else {

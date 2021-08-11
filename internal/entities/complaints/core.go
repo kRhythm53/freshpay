@@ -23,11 +23,13 @@ func GetComplaintByID(Complaint *Complaint, id string) (err error) {
 	return GetComplaintByIDFromDB(Complaint,id)
 }
 
-func UpdateComplaint(Complaint *Complaint, id string, refund string) (err error) {
+func UpdateComplaint(Complaint *Complaint, id string, refund string,admin string) (err error) {
 	//config.DB.Where("id = ?", id).Delete(&Complaint)
-	if Complaint.ComplaintType == "other"{
-		Complaint.Status = "processed"
-	}else if Complaint.ComplaintType == "refund"{
+	if Complaint.Status == "processed"{
+		return nil
+	}
+	Complaint.AdminId = admin
+	if Complaint.ComplaintType == "refund"{
 		if refund == "eligible"{
 			Complaint.Status = "processed"
 			var RefundId string
@@ -36,9 +38,11 @@ func UpdateComplaint(Complaint *Complaint, id string, refund string) (err error)
 				return err
 			}
 			Complaint.RefundId=RefundId
-		}else{
+		} else{
 			Complaint.Status = "processed"
 		}
+	} else{
+		Complaint.Status = "processed"
 	}
 	config.DB.Save(Complaint)
 	return nil

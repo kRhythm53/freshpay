@@ -13,6 +13,7 @@ type Complaint struct {
 	PaymentsId    string `json:"payments_id"`
 	UserId        string `json:"user_id"`
 	RefundId      string `json:"refund_id"`
+	AdminId		  string `json:"admin_id"`
 }
 
 func (c *Complaint) TableName() string {
