@@ -54,22 +54,15 @@ func LoginByPassword(c *gin.Context){
 		})
 	} else{
 		c.Writer.Header().Set("session_id",Session.ID)
-		c.JSON(http.StatusOK,gin.H{
-			"Entity": user.EntityName,
-			"status": gin.H{
-				"type": "success",
-				"message": "Success",
-				"code": 200,
-				"error": false,
-			},
-			"Data": gin.H{
-				"status": "Authenticated",
-				"User": gin.H{
-					"ID":Admin.ID,
-					"Name":Admin.Name,
-					"PhoneNumber":Admin.PhoneNumber,
-					"Email":Admin.Email,
-				},
+		c.JSON(200,gin.H{
+			"Entity": admin.EntityName,
+			"Status":"Success",
+			"Message":"Login Successfully",
+			"User": gin.H{
+				"ID":Admin.ID,
+				"Name":Admin.Name,
+				"PhoneNumber":Admin.PhoneNumber,
+				"Email":Admin.Email,
 			},
 		})
 	}

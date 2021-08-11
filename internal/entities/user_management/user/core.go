@@ -48,6 +48,7 @@ func SignUp(user *Detail) (err error) {
 	if err != nil {
 		return err
 	}
+	user.IsVerified=false
 	user.ID = utilities.CreateID(Prefix, IDLengthExcludingPrefix)
 
 	/*
@@ -114,7 +115,7 @@ func LoginByPassword(phoneNumber string, password string, Session *user_session.
 			/*
 			   need to remove this line
 			*/
-			//return err
+			return err
 		}
 		if  !utilities.MatchPassword(password,user.Password){
 			err = errors.New("Password is Wrong")
@@ -140,6 +141,5 @@ func SetVerifiedUserByPhoneNumber(phoneNumber string) (err error) {
 		user.IsVerified = true
 		err = UpdateUser(&user)
 	}
-	fmt.Println(user)
 	return err
 }

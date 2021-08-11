@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"fmt"
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/user_management/utilities"
 )
@@ -25,6 +26,7 @@ func GetWalletById(wallet *Detail,id string)(err error){
 }
 
 func GetWalletByUserId(wallet *Detail,userId string)(err error){
+	fmt.Println("user_id: ",userId);
 	if err=config.DB.Table("wallet").Where("user_id = ?",userId).First(wallet).Error;err!=nil{
 		return err
 	}

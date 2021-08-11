@@ -98,7 +98,7 @@ func LoginByPassword(phoneNumber string, password string, Session *admin_session
 			/*
 			   need to remove this line
 			*/
-			//return err
+			return err
 		}
 		if !utilities.MatchPassword(password,admin.Password) {
 			err = errors.New("Password is Wrong")

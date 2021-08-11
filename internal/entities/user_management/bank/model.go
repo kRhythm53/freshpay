@@ -9,6 +9,7 @@ type Detail struct {
 	BankName      string
 	AccountNumber string
 	IFSCCode      string
+	AccountHolderName string
 }
 
 const (

@@ -14,6 +14,7 @@ func GetWalletBalance(c *gin.Context){
 	if err!=nil{
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"Code": "Internal_Server_Error",
+			"Status":"failed",
 			"Description":err.Error(),
 			"Source": "internal",
 			"Reason": "",
@@ -51,6 +52,7 @@ func GetWalletByPhoneNumber(c *gin.Context){
 	if err!=nil{
 		c.JSON(http.StatusNotFound, gin.H{
 			"Code": "BAD_REQUEST_ERROR",
+			"Status":"failed",
 			"Description":err.Error(),
 			"Source": "business",
 			"Reason": "The Phone Number isn't registered",
