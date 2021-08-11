@@ -17,14 +17,24 @@ import (
 	"time"
 )
 
+//Flow of payments  :
+// Initiate a payment -> validity checks -> push to InputPaymentChannel
+// Transaction module receives the payment request from channel and initiates transaction steps
+// After successful completion of transactions, transaction module pushes the payment to ResultsPaymentChannel
+// PaymentReceiver then receives the updated payment struct and updates the DB
+// Check if the payment is eligible for a cashback, if yes a cashback is initiated by simply adding a payment request to InputPaymentChannel
+// Admin can initiate by refund by initiating a payment to InputPaymentChannel
+
+
 var InputPaymentsChannel = make(chan *Payments, 1000)
 var ResultsPaymentsChannel = make(chan *Payments, 1000)
 var mutex = &sync.Mutex{}
 
+// AddPayments :Initiate payment after validity checks, with payment status as processing and push the payment struct to channel
 func AddPayments(payment *Payments, userId string) (err error) {
 	payment.Type = GetPaymentType(payment)
 	payment.Status = "processing"
-	payment.ID = utilities.RandomString(14, constants.PaymentPrefix)
+	payment.ID = utilities.RandomString(constants.IDLength, constants.PaymentPrefix)
 	err = ValidityCheck(payment, userId)
 	if err != nil {
 		return err
@@ -34,10 +44,16 @@ func AddPayments(payment *Payments, userId string) (err error) {
 	return AddPaymentToDB(payment)
 }
 
+// GetPaymentByID :Get payment for the given payment id
 func GetPaymentByID(payment *Payments, id string) (err error) {
 	return GetPaymentByIDFromDB(payment, id)
 }
 
+// GetPaymentsByTime :Get all payments for logged in user, based on time and type
+// from = {int epoch value}, to = {int, epoch value}, type=credit/debit
+// if from is not specified , consider from time 0
+// if to is not specified , consider till current time
+// if type is not specified , consider both debit and credit transactions
 func GetPaymentsByTime(payments *[]Payments, from string, to string, TransactionType string, userID string) (err error) {
 	var startTime, endTime int64
 	if from == "" {
@@ -65,6 +81,21 @@ func GetPaymentsByTime(payments *[]Payments, from string, to string, Transaction
 	return GetPaymentByTimeFromDB(payments, startTime, endTime, TransactionType, Wallet.ID)
 }
 
+// PaymentReceiver : A receiver go routine after all transactions have been completed
+func PaymentReceiver() {
+	for {
+		select {
+		case payment := <-ResultsPaymentsChannel:
+			err := UpdatePayment(payment)
+			if err != nil {
+				return
+			}
+		}
+	}
+}
+
+// UpdatePayment :Update payment in DB after all transactions are completed successfully,
+// increment transaction count of user and check for eligible cashback offers
 func UpdatePayment(payment *Payments) (err error) {
 	id, err := GetUserIdFromFundId(payment.SourceId)
 	if err != nil {
@@ -78,11 +109,8 @@ func UpdatePayment(payment *Payments) (err error) {
 	if err != nil {
 		return err
 	}
-	//fmt.Println("check1")
-	//fmt.Println(payment)
 	if payment.Type != "Cashback" && payment.Type != "Refund" {
 		err = InitiateCashback(payment)
-		//fmt.Println("check2")
 		if err != nil {
 			return err
 		}
@@ -90,18 +118,7 @@ func UpdatePayment(payment *Payments) (err error) {
 	return nil
 }
 
-func PaymentReceiver() {
-	for {
-		select {
-		case payment := <-ResultsPaymentsChannel:
-			err := UpdatePayment(payment)
-			if err != nil {
-				return
-			}
-		}
-	}
-}
-
+// GetPaymentType :i.e. wallet-to-wallet / cash withdrawal / add to wallet / cashback / refund
 func GetPaymentType(payment *Payments) string {
 	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix) {
 		if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix) {
@@ -114,6 +131,11 @@ func GetPaymentType(payment *Payments) string {
 	}
 }
 
+// ValidityCheck :
+//1. source wallet/bank does not exist or does not belong to user
+//2. negative amount
+//3. transaction amount is greater than wallet balance
+//4. destination bank does not exists as beneficiary
 func ValidityCheck(payment *Payments, userId string) (err error) {
 	if payment.Amount < 0 {
 		return errors.New("payment amount invalid")
@@ -121,7 +143,7 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 	var balance int
 	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix) {
 		var Source wallet.Detail
-		err := wallet.GetWalletById(&Source, payment.SourceId)
+		err = wallet.GetWalletById(&Source, payment.SourceId)
 		if err != nil {
 			return errors.New("source wallet does not exist")
 		}
@@ -134,7 +156,7 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 		}
 	} else if strings.HasPrefix(payment.SourceId, constants.BankPrefix) {
 		var Source bank.Detail
-		err := bank.GetBankById(&Source, payment.SourceId)
+		err = bank.GetBankById(&Source, payment.SourceId)
 		if err != nil {
 			return errors.New("source bank account does not exist")
 		}
@@ -146,19 +168,19 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 	}
 	if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix) {
 		var Destination wallet.Detail
-		err := wallet.GetWalletById(&Destination, payment.DestinationId)
+		err = wallet.GetWalletById(&Destination, payment.DestinationId)
 		if err != nil {
 			return errors.New("destination wallet does not exist")
 		}
 	} else if strings.HasPrefix(payment.DestinationId, constants.BankPrefix) {
 		var Destination bank.Detail
-		err := bank.GetBankById(&Destination, payment.DestinationId)
+		err = bank.GetBankById(&Destination, payment.DestinationId)
 		if err != nil {
 			return errors.New("destination bank account does not exist")
 		}
 	} else if strings.HasPrefix(payment.DestinationId, constants.BeneficiaryPrefix) {
 		var Destination beneficiary.Detail
-		err := beneficiary.GetBeneficiaryById(&Destination, payment.DestinationId)
+		err = beneficiary.GetBeneficiaryById(&Destination, payment.DestinationId)
 		if err != nil {
 			return errors.New("destination bank account does not exist as beneficiary")
 		}
@@ -169,18 +191,19 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 	return nil
 }
 
+// InitiateRefund :A refund is initiated by Admin for given payment id and user id
 func InitiateRefund(paymentID string, UserID string) (RefundID string, err error) {
 	var RefundPayment Payments
 	var payment Payments
-	err2 := GetPaymentByID(&payment, paymentID)
-	if err2 != nil {
+	err = GetPaymentByID(&payment, paymentID)
+	if err != nil {
 		return "", errors.New("failed to get payment details")
 	}
 
 	var RefundWallet wallet.Detail
-	err3 := wallet.GetWalletByUserId(&RefundWallet, UserID)
-	if err3 != nil {
-		return "", err3
+	err = wallet.GetWalletByUserId(&RefundWallet, UserID)
+	if err != nil {
+		return "", err
 	}
 
 	RefundPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
@@ -191,42 +214,42 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 	RefundPayment.Type = "Refund"
 	RefundPayment.Status = "processing"
 	InputPaymentsChannel <- &RefundPayment
-	err4 := AddPaymentToDB(&RefundPayment)
-	if err4 != nil {
-		return "", err4
+	err = AddPaymentToDB(&RefundPayment)
+	if err != nil {
+		return "", err
 	}
 	return RefundPayment.ID, nil
 }
 
+// InitiateCashback :Checks with campaign module if the payments is eligible for a cashback,
+// if yes, initiate a cashback to user wallet
 func InitiateCashback(payment *Payments) (err error) {
 	var userID string
 	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix) {
 		var Source wallet.Detail
-		err := wallet.GetWalletById(&Source, payment.SourceId)
+		err = wallet.GetWalletById(&Source, payment.SourceId)
 		if err != nil {
 			return errors.New("failed to get wallet details")
 		}
 		userID = Source.UserId
 	} else {
 		var Source bank.Detail
-		err := bank.GetBankById(&Source, payment.SourceId)
+		err = bank.GetBankById(&Source, payment.SourceId)
 		if err != nil {
 			return errors.New("failed to get bank details")
 		}
 		userID = Source.UserId
 	}
 	Cashback := campaigns.Eligibility(payment.CreatedAt, payment.Amount, userID)
-	//fmt.Println("check3")
 	if Cashback > 0 {
 		var CashbackPayment Payments
-		CashbackPayment.ID = utilities.RandomString(14, constants.PaymentPrefix)
+		CashbackPayment.ID = utilities.RandomString(constants.IDLength, constants.PaymentPrefix)
 		CashbackPayment.Amount = int64(Cashback)
 		CashbackPayment.Currency = "INR"
 		CashbackPayment.SourceId = constants.RzpWalletID
 		CashbackPayment.DestinationId = payment.SourceId
 		CashbackPayment.Type = "Cashback"
 		CashbackPayment.Status = "processing"
-		//fmt.Println("check4")
 		InputPaymentsChannel <- &CashbackPayment
 		return AddPaymentToDB(&CashbackPayment)
 	}

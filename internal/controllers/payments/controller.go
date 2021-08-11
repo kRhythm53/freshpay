@@ -1,6 +1,7 @@
 package payments
 
 import (
+	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/payments/payments"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -9,17 +10,6 @@ import (
 type Response struct{
 	Entity string
 	Payment payments.Payments
-}
-type Error struct{
-	Code string
-	Description string
-	Source string
-	Reason string
-	Step string
-	Metadata string
-}
-type Failure struct{
-	Error Error
 }
 
 func AddPayments(c *gin.Context) {
@@ -31,14 +21,10 @@ func AddPayments(c *gin.Context) {
 	userId :=c.GetString("userId")
 	err = payments.AddPayments(&payment,userId)
 	if err != nil {
-		//c.String(http.StatusBadRequest, err2.Error())
-		c.JSON(http.StatusBadRequest,Failure{Error: Error{"Bad request error",err.Error(),"business","validation failed","NA",""}})
+		c.JSON(http.StatusBadRequest,constants.Failure{Error: constants.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
 	} else {
-		//fmt.Println(resp)
-		//fmt.Println(payment)
 		resp:= Response{Entity: "payments",Payment: payment}
 		c.JSON(http.StatusOK, resp)
-		//c.JSON(http.StatusOK,payment)
 	}
 }
 
@@ -47,12 +33,10 @@ func GetPaymentByID(c *gin.Context) {
 	id := c.Params.ByName("payments_id")
 	err := payments.GetPaymentByID(&payment, id)
 	if err != nil {
-		//c.String(http.StatusBadRequest, err.Error())
-		c.JSON(http.StatusBadRequest,Failure{Error: Error{"Bad request error",err.Error(),"business","validation failed","NA",""}})
+		c.JSON(http.StatusBadRequest,constants.Failure{Error: constants.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
 	} else {
 		resp:= Response{Entity: "payments",Payment: payment}
 		c.JSON(http.StatusOK, resp)
-		//c.JSON(http.StatusOK, payment)
 	}
 }
 
@@ -64,14 +48,12 @@ func GetPaymentsByTime(c *gin.Context) {
 	userId := c.GetString("userId")
 	err := payments.GetPaymentsByTime(&payment, from, to, TransactionType, userId)
 	if err != nil {
-		//c.String(http.StatusBadRequest, err.Error())
-		c.JSON(http.StatusBadRequest,Failure{Error: Error{"Bad request error",err.Error(),"business","validation failed","NA",""}})
+		c.JSON(http.StatusBadRequest,constants.Failure{Error: constants.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
 	} else {
 		resp := make([]Response, len(payment))
 		for i,payment := range payment{
 			resp[i]= Response{Entity: "Payments",Payment: payment}
 		}
 		c.JSON(http.StatusOK, resp)
-		//c.JSON(http.StatusOK, payment)
 	}
 }
