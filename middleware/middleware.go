@@ -21,6 +21,14 @@ var PublicPath = []string{
 	"/users/signup/otp/verification",
 	"/admin/signup/otp/verification",
 	"/wallet/:phone_number",
+	"/users/signin/otp/:phone_number",
+	"/users/signin/otp/verification",
+	"/users/reset/password/:phone_number",
+	"/users/reset/password/otp/verification/:password",
+	"/admin/signin/otp/:phone_number",
+	"/admin/signin/otp/verification",
+	"/admin/reset/password/:phone_number",
+	"/admin/reset/password/otp/verification/:password",
 }
 
 /*

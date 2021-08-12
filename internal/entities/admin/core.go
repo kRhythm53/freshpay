@@ -14,7 +14,7 @@ func SignUp(admin *Detail) (err error){
 	phoneNumber :=admin.PhoneNumber
 
 	//Validate the input
-	err=ValideInput(admin)
+	err= ValidateInput(admin)
 	if err!=nil{
 		return err
 	}
@@ -104,7 +104,54 @@ func LoginByPassword(phoneNumber string, password string, Session *admin_session
 	return err
 }
 
+//Login By Using OTP
+func LoginByOTP(PhoneNumber string)(err error){
+	return SendOTPToRegisteredNumber(PhoneNumber)
+}
 
+//Login By OTP Verification
+func LoginByOTPVerification(otp OTP.Detail,Session *admin_session.Detail, Admin *Detail)(err error){
+	err=OTP.VerifyOTP(otp)
+	if err!=nil{
+		return err
+	}
+	err=GetAdminByPhoneNumber(Admin,otp.PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	err=admin_session.GetActiveSessionByAdminId(Session,Admin.ID)
+	if err==nil{
+		return nil
+	}
+	Session.AdminId = Admin.ID
+	err = admin_session.CreateSession(Session)
+	return err
+}
+//Reset Password Using OTP at the registered Phone Number
+func ResetPasswordByOTP(PhoneNumber string)(err error){
+	return SendOTPToRegisteredNumber(PhoneNumber)
+}
+
+//Reset Password By OTP Verification
+func ResetPasswordByOTPVerification(otp OTP.Detail,password string) (err error) {
+	err=OTP.VerifyOTP(otp)
+	if err!=nil{
+		return err
+	}
+	var admin Detail
+	err=GetAdminByPhoneNumber(&admin,otp.PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	var passwordHash string
+	err=utilities.GetEncryption(password,&passwordHash)
+	if err!=nil {
+		return err
+	}
+	admin.Password=passwordHash
+	err=UpdateAdmin(&admin)
+	return err
+}
 
 
 //set verified admin by phone number
@@ -135,7 +182,22 @@ func DeleteAdmin(admin *Detail)(err error){
 }
 
 //Validate the Input
-func ValideInput(admin *Detail) (err error){
+func ValidateInput(admin *Detail) (err error){
 	err=utilities.ValidatePhoneNumber(admin.PhoneNumber)
+	return err
+}
+
+//Function to send OTP Registered Number
+func SendOTPToRegisteredNumber(PhoneNumber string)(err error){
+	err=utilities.ValidatePhoneNumber(PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	var tempAdmin Detail
+	err=GetAdminByPhoneNumber(&tempAdmin,PhoneNumber)
+	if err!=nil{
+		return errors.New("Phone Number is not registered, Please Signup first")
+	}
+	err=OTP.SendOTP(PhoneNumber)
 	return err
 }

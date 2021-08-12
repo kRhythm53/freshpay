@@ -16,7 +16,7 @@ func SignUp(user *Detail) (err error) {
 	phoneNumber := user.PhoneNumber
 
 	//Validate the Input
-	err=ValideInput(user)
+	err= ValidateInput(user)
 
 	if err!=nil{
 		return err
@@ -121,6 +121,55 @@ func LoginByPassword(phoneNumber string, password string, Session *user_session.
 	return err
 }
 
+//Login By Using OTP
+func LoginByOTP(PhoneNumber string)(err error){
+	return SendOTPToRegisteredNumber(PhoneNumber)
+}
+
+//Login By OTP Verification
+func LoginByOTPVerification(otp OTP.Detail,Session *user_session.Detail, User *Detail)(err error){
+	err=OTP.VerifyOTP(otp)
+	if err!=nil{
+		return err
+	}
+	err=GetUserByPhoneNumber(User,otp.PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	err=user_session.GetActiveSessionByUserId(Session,User.ID)
+	if err==nil{
+		return nil
+	}
+	Session.UserId = User.ID
+	err = user_session.CreateSession(Session)
+	return err
+}
+//Reset Password Using OTP at the registered Phone Number
+func ResetPasswordByOTP(PhoneNumber string)(err error){
+	return SendOTPToRegisteredNumber(PhoneNumber)
+}
+
+//Reset Password By OTP Verification
+func ResetPasswordByOTPVerification(otp OTP.Detail,password string) (err error) {
+	err=OTP.VerifyOTP(otp)
+	if err!=nil{
+		return err
+	}
+	var user Detail
+	err=GetUserByPhoneNumber(&user,otp.PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	var passwordHash string
+	err=utilities.GetEncryption(password,&passwordHash)
+	if err!=nil {
+		return err
+	}
+	user.Password=passwordHash
+	err=UpdateUser(&user)
+	return err
+}
+
 //set verified user by phone number
 func SetVerifiedUserByPhoneNumber(phoneNumber string) (err error) {
 	var user Detail
@@ -133,7 +182,22 @@ func SetVerifiedUserByPhoneNumber(phoneNumber string) (err error) {
 }
 
 //Validate the Input
-func ValideInput(user *Detail) (err error){
+func ValidateInput(user *Detail) (err error){
 	err=utilities.ValidatePhoneNumber(user.PhoneNumber)
+	return err
+}
+
+//Function to send OTP Registered Number
+func SendOTPToRegisteredNumber(PhoneNumber string)(err error){
+	err=utilities.ValidatePhoneNumber(PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	var tempUser Detail
+	err=GetUserByPhoneNumber(&tempUser,PhoneNumber)
+	if err!=nil{
+		return errors.New("Phone Number is not registered, Please Signup first")
+	}
+	err=OTP.SendOTP(PhoneNumber)
 	return err
 }
