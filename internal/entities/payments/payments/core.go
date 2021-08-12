@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/freshpay/internal/config"
-	"github.com/freshpay/internal/constants"
 	"github.com/freshpay/internal/entities/campaigns"
 	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/freshpay/internal/entities/user_management/beneficiary"
@@ -33,7 +32,7 @@ var mutex = &sync.Mutex{}
 func AddPayments(payment *Payments, userId string) (err error) {
 	payment.Type = GetPaymentType(payment)
 	payment.Status = "processing"
-	payment.ID = utilities.RandomString(constants.IDLength, constants.PaymentPrefix)
+	payment.ID = utilities.CreateID(Prefix, IDLength)
 	err = ValidityCheck(payment, userId)
 	if err != nil {
 		return err
@@ -128,14 +127,14 @@ func UpdatePayment(payment *Payments) (err error) {
 
 // GetPaymentType :i.e. wallet-to-wallet / cash withdrawal / add to wallet / cashback / refund
 func GetPaymentType(payment *Payments) string {
-	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix) {
-		if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix) {
-			return constants.PaymentTypeWalletTransfer
+	if strings.HasPrefix(payment.SourceId, wallet.Prefix) {
+		if strings.HasPrefix(payment.DestinationId, wallet.Prefix) {
+			return PaymentTypeWalletTransfer
 		} else {
-			return constants.PaymentTypeBankWithdrawal
+			return PaymentTypeBankWithdrawal
 		}
 	} else {
-		return constants.PaymentTypeAddToWallet
+		return PaymentTypeAddToWallet
 	}
 }
 
@@ -152,7 +151,7 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 	if err = SourceValidityCheck(payment, userId); err != nil {
 		return err
 	}
-	if err = DestinationValidityCheck(payment, userId); err != nil {
+	if err = DestinationValidityCheck(payment); err != nil {
 		return err
 	}
 
@@ -161,7 +160,7 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 
 func SourceValidityCheck(payment *Payments, userId string) (err error) {
 	var balance int
-	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix) {
+	if strings.HasPrefix(payment.SourceId, wallet.Prefix) {
 		var Source wallet.Detail
 		err = wallet.GetWalletById(&Source, payment.SourceId)
 		if err != nil {
@@ -174,7 +173,7 @@ func SourceValidityCheck(payment *Payments, userId string) (err error) {
 		if balance < int(payment.Amount) {
 			return errors.New("low wallet balance")
 		}
-	} else if strings.HasPrefix(payment.SourceId, constants.BankPrefix) {
+	} else if strings.HasPrefix(payment.SourceId, bank.Prefix) {
 		var Source bank.Detail
 		err = bank.GetBankById(&Source, payment.SourceId)
 		if err != nil {
@@ -189,20 +188,20 @@ func SourceValidityCheck(payment *Payments, userId string) (err error) {
 	return nil
 }
 
-func DestinationValidityCheck(payment *Payments, userId string) (err error) {
-	if strings.HasPrefix(payment.DestinationId, constants.WalletPrefix) {
+func DestinationValidityCheck(payment *Payments) (err error) {
+	if strings.HasPrefix(payment.DestinationId, wallet.Prefix) {
 		var Destination wallet.Detail
 		err = wallet.GetWalletById(&Destination, payment.DestinationId)
 		if err != nil {
 			return errors.New("destination wallet does not exist")
 		}
-	} else if strings.HasPrefix(payment.DestinationId, constants.BankPrefix) {
+	} else if strings.HasPrefix(payment.DestinationId, bank.Prefix) {
 		var Destination bank.Detail
 		err = bank.GetBankById(&Destination, payment.DestinationId)
 		if err != nil {
 			return errors.New("destination bank account does not exist")
 		}
-	} else if strings.HasPrefix(payment.DestinationId, constants.BeneficiaryPrefix) {
+	} else if strings.HasPrefix(payment.DestinationId, beneficiary.Prefix) {
 		var Destination beneficiary.Detail
 		err = beneficiary.GetBeneficiaryById(&Destination, payment.DestinationId)
 		if err != nil {
@@ -229,10 +228,10 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 		return "", err
 	}
 
-	RefundPayment.ID = utilities.RandomString(constants.IDLength, constants.PaymentPrefix)
+	RefundPayment.ID = utilities.CreateID(Prefix, IDLength)
 	RefundPayment.Amount = payment.Amount
 	RefundPayment.Currency = "INR"
-	RefundPayment.SourceId = constants.RzpWalletID
+	RefundPayment.SourceId = RzpWalletID
 	RefundPayment.DestinationId = RefundWallet.ID
 	RefundPayment.Type = "Refund"
 	RefundPayment.Status = "processing"
@@ -248,7 +247,7 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 // if yes, initiate a cashback to user wallet
 func InitiateCashback(payment *Payments) (err error) {
 	var userID string
-	if strings.HasPrefix(payment.SourceId, constants.WalletPrefix) {
+	if strings.HasPrefix(payment.SourceId, wallet.Prefix) {
 		var Source wallet.Detail
 		err = wallet.GetWalletById(&Source, payment.SourceId)
 		if err != nil {
@@ -266,10 +265,10 @@ func InitiateCashback(payment *Payments) (err error) {
 	Cashback := campaigns.Eligibility(payment.CreatedAt, payment.Amount, userID)
 	if Cashback > 0 {
 		var CashbackPayment Payments
-		CashbackPayment.ID = utilities.RandomString(constants.IDLength, constants.PaymentPrefix)
+		CashbackPayment.ID = utilities.CreateID(Prefix, IDLength)
 		CashbackPayment.Amount = int64(Cashback)
 		CashbackPayment.Currency = "INR"
-		CashbackPayment.SourceId = constants.RzpWalletID
+		CashbackPayment.SourceId = RzpWalletID
 		CashbackPayment.DestinationId = payment.SourceId
 		CashbackPayment.Type = "Cashback"
 		CashbackPayment.Status = "processing"
@@ -281,7 +280,7 @@ func InitiateCashback(payment *Payments) (err error) {
 
 func GetUserIdFromFundId(FundId string) (string, error) {
 	var userID string
-	if strings.HasPrefix(FundId, constants.WalletPrefix) {
+	if strings.HasPrefix(FundId, wallet.Prefix) {
 		var Source wallet.Detail
 		err := wallet.GetWalletById(&Source, FundId)
 		if err != nil {
@@ -315,10 +314,10 @@ func UpdateTransactionCount(userID string) (err error) {
 
 func CreateRzpAccount() (err error) {
 	var RZP user.Detail
-	if err = user.GetUserByPhoneNumber(&RZP, constants.RazorpayPhoneNumber); err != nil {
-		RZP.Name = constants.RazorpayName
-		RZP.Password = constants.RazorpayPassword
-		RZP.PhoneNumber = constants.RazorpayPhoneNumber
+	if err = user.GetUserByPhoneNumber(&RZP, RazorpayPhoneNumber); err != nil {
+		RZP.Name = RazorpayName
+		RZP.Password = RazorpayPassword
+		RZP.PhoneNumber = RazorpayPhoneNumber
 		RZP.IsVerified = true
 		err = user.SignUp(&RZP)
 		if err != nil {
@@ -332,8 +331,8 @@ func CreateRzpAccount() (err error) {
 	if err != nil {
 		return err
 	}
-	constants.RzpWalletID = RZPWallet.ID
-	amount := constants.RazorpayBalance - RZPWallet.Balance
-	wallet.UpdateWalletBalance(constants.RzpWalletID, int64(amount))
+	RzpWalletID = RZPWallet.ID
+	amount := RazorpayBalance - RZPWallet.Balance
+	wallet.UpdateWalletBalance(RzpWalletID, int64(amount))
 	return nil
 }

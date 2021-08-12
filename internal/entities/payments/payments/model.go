@@ -14,6 +14,22 @@ type Payments struct {
 	Status        string `json:"status"`
 }
 
+const (
+	Prefix                    = "paymt"
+	PaymentTypeWalletTransfer = "wallet transfer"
+	PaymentTypeBankWithdrawal = "bank withdrawal"
+	PaymentTypeAddToWallet    = "add to wallet"
+	RazorpayName              = "Razorpay Central Account"
+	RazorpayPassword          = "Razorpay123"
+	RazorpayPhoneNumber       = "1234567890"
+	RazorpayBalance           = 10000000000
+	IDLength                  = 14
+)
+
+var (
+	RzpWalletID string
+)
+
 func (b *Payments) TableName() string {
 	return "payments"
 }

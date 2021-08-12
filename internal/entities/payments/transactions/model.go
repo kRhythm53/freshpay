@@ -17,6 +17,13 @@ type Transactions struct {
 	PaymentsId    string `gorm:"type:varchar(20),constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Payments      payments.Payments
 }
+
+const (
+	Prefix                    = "trans"
+	IDLength                  = 14
+)
+
+
 func (b *Transactions) TableName() string {
 	return "transactions"
 }
