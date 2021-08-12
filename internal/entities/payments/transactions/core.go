@@ -14,7 +14,7 @@ func InitiateTransaction() {
 		select {
 		case payment := <-payments.InputPaymentsChannel:
 			var err error
-			if payment.Type == "Cashback" || payment.Type == "Refund" {
+			if payment.Type == payments.PaymentTypeCashback || payment.Type == payments.PaymentTypeRefund {
 				if strings.HasPrefix(payment.DestinationId, bank.Prefix) {
 					var Bank bank.Detail
 					var Wallet wallet.Detail
@@ -30,17 +30,17 @@ func InitiateTransaction() {
 				}
 				err = AddTransactions(payment, payments.RzpWalletID, payment.DestinationId)
 				if err != nil {
-					payment.Status = "failed"
+					payment.Status = payments.PaymentStatusFailed
 				} else {
-					payment.Status = "processed"
+					payment.Status = payments.PaymentStatusFailed
 				}
 			} else {
 				if err = AddTransactions(payment, payment.SourceId, payments.RzpWalletID); err != nil {
-					payment.Status = "failed"
+					payment.Status = payments.PaymentStatusFailed
 				} else if err = AddTransactions(payment, payments.RzpWalletID, payment.DestinationId); err != nil {
-					payment.Status = "failed"
+					payment.Status = payments.PaymentStatusFailed
 				} else {
-					payment.Status = "processed"
+					payment.Status = payments.PaymentStatusProcessed
 				}
 			}
 			payments.ResultsPaymentsChannel <- payment
@@ -58,7 +58,7 @@ func AddTransactions(payment *payments.Payments, sourceID string, destinationID 
 	transaction.DestinationId = destinationID
 
 	transaction.Type = payment.Type
-	transaction.Status = "processed"
+	transaction.Status = payments.PaymentStatusProcessed
 	transaction.PaymentsId = payment.ID
 	transaction.CreatedAt = time.Now().Unix()
 	transaction.UpdatedAt = time.Now().Unix()

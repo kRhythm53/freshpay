@@ -31,7 +31,7 @@ var mutex = &sync.Mutex{}
 // AddPayments :Initiate payment after validity checks, with payment status as processing and push the payment struct to channel
 func AddPayments(payment *Payments, userId string) (err error) {
 	payment.Type = GetPaymentType(payment)
-	payment.Status = "processing"
+	payment.Status = PaymentStatusProcessing
 	payment.ID = utilities.CreateID(Prefix, IDLength)
 	err = ValidityCheck(payment, userId)
 	if err != nil {
@@ -116,7 +116,7 @@ func UpdatePayment(payment *Payments) (err error) {
 	if err != nil {
 		return err
 	}
-	if payment.Type != "Cashback" && payment.Type != "Refund" {
+	if payment.Type != PaymentTypeCashback && payment.Type != PaymentTypeRefund {
 		err = InitiateCashback(payment)
 		if err != nil {
 			return err
@@ -230,11 +230,10 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 
 	RefundPayment.ID = utilities.CreateID(Prefix, IDLength)
 	RefundPayment.Amount = payment.Amount
-	RefundPayment.Currency = "INR"
 	RefundPayment.SourceId = RzpWalletID
 	RefundPayment.DestinationId = RefundWallet.ID
-	RefundPayment.Type = "Refund"
-	RefundPayment.Status = "processing"
+	RefundPayment.Type = PaymentTypeRefund
+	RefundPayment.Status = PaymentStatusProcessing
 	err = AddPaymentToDB(&RefundPayment)
 	if err != nil {
 		return "", err
@@ -267,11 +266,10 @@ func InitiateCashback(payment *Payments) (err error) {
 		var CashbackPayment Payments
 		CashbackPayment.ID = utilities.CreateID(Prefix, IDLength)
 		CashbackPayment.Amount = int64(Cashback)
-		CashbackPayment.Currency = "INR"
 		CashbackPayment.SourceId = RzpWalletID
 		CashbackPayment.DestinationId = payment.SourceId
-		CashbackPayment.Type = "Cashback"
-		CashbackPayment.Status = "processing"
+		CashbackPayment.Type = PaymentTypeCashback
+		CashbackPayment.Status = PaymentStatusProcessing
 		InputPaymentsChannel <- &CashbackPayment
 		return AddPaymentToDB(&CashbackPayment)
 	}

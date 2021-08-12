@@ -7,7 +7,7 @@ import (
 type Payments struct {
 	base.Model
 	Amount        int64  `json:"amount"`
-	Currency      string `json:"currency"`
+	Currency      string `gorm:"default:'INR'",json:"currency"`
 	SourceId      string `json:"source_id"`
 	DestinationId string `json:"destination_id"`
 	Type          string `json:"type"`
@@ -19,6 +19,11 @@ const (
 	PaymentTypeWalletTransfer = "wallet transfer"
 	PaymentTypeBankWithdrawal = "bank withdrawal"
 	PaymentTypeAddToWallet    = "add to wallet"
+	PaymentTypeCashback       = "cashback"
+	PaymentTypeRefund         = "refund"
+	PaymentStatusProcessing   = "processing"
+	PaymentStatusFailed       = "failed"
+	PaymentStatusProcessed    = "processed"
 	RazorpayName              = "Razorpay Central Account"
 	RazorpayPassword          = "Razorpay123"
 	RazorpayPhoneNumber       = "1234567890"
