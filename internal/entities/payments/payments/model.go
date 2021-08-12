@@ -26,7 +26,7 @@ const (
 	PaymentStatusProcessed    = "processed"
 	RazorpayName              = "Razorpay Central Account"
 	RazorpayPassword          = "Razorpay123"
-	RazorpayPhoneNumber       = "1234567890"
+	RazorpayPhoneNumber       = "1034567890"
 	RazorpayBalance           = 10000000000
 	IDLength                  = 14
 )

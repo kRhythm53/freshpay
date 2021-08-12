@@ -2,7 +2,6 @@ package transactions
 
 import (
 	"github.com/freshpay/internal/entities/payments/payments"
-	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/freshpay/internal/entities/user_management/wallet"
 	"github.com/freshpay/utilities"
 	"strings"
@@ -15,26 +14,12 @@ func InitiateTransaction() {
 		case payment := <-payments.InputPaymentsChannel:
 			var err error
 			if payment.Type == payments.PaymentTypeCashback || payment.Type == payments.PaymentTypeRefund {
-				if strings.HasPrefix(payment.DestinationId, bank.Prefix) {
-					var Bank bank.Detail
-					var Wallet wallet.Detail
-					err = bank.GetBankById(&Bank, payment.DestinationId)
-					if err != nil {
-						return
-					}
-					err = wallet.GetWalletByUserId(&Wallet, Bank.UserId)
-					if err != nil {
-						return
-					}
-					payment.DestinationId = Wallet.ID
-				}
-				err = AddTransactions(payment, payments.RzpWalletID, payment.DestinationId)
-				if err != nil {
+				if err = AddTransactions(payment, payments.RzpWalletID, payment.DestinationId);err != nil {
 					payment.Status = payments.PaymentStatusFailed
 				} else {
-					payment.Status = payments.PaymentStatusFailed
+					payment.Status = payments.PaymentStatusProcessed
 				}
-			} else {
+			} else if payment.Type == payments.PaymentTypeAddToWallet || payment.Type == payments.PaymentTypeWalletTransfer || payment.Type == payments.PaymentTypeBankWithdrawal {
 				if err = AddTransactions(payment, payment.SourceId, payments.RzpWalletID); err != nil {
 					payment.Status = payments.PaymentStatusFailed
 				} else if err = AddTransactions(payment, payments.RzpWalletID, payment.DestinationId); err != nil {

@@ -12,7 +12,7 @@ type Detail struct {
 const (
 	TableName               ="user_session"
 	EntityName              ="user_session"
-	ExpireTime              =300  //time in seconds
+	ExpireTime              =300000  //time in seconds
 	IDLengthExcludingPrefix =14
 	Prefix                  ="sUsr"
 )

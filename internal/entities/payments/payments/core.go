@@ -104,21 +104,14 @@ func PaymentReceiver() {
 // UpdatePayment :Update payment in DB after all transactions are completed successfully,
 // increment transaction count of user and check for eligible cashback offers
 func UpdatePayment(payment *Payments) (err error) {
-	id, err := GetUserIdFromFundId(payment.SourceId)
-	if err != nil {
-		return errors.New("failed to update payment , could not find user id for given fund id")
-	}
-	err = UpdateTransactionCount(id)
-	if err != nil {
+	if err = UpdateTransactionCount(payment); err != nil {
 		return errors.New("could not update transaction count")
 	}
-	err = UpdatePaymentToDB(payment)
-	if err != nil {
+	if err = UpdatePaymentToDB(payment); err != nil {
 		return err
 	}
 	if payment.Type != PaymentTypeCashback && payment.Type != PaymentTypeRefund {
-		err = InitiateCashback(payment)
-		if err != nil {
+		if err = InitiateCashback(payment); err != nil {
 			return err
 		}
 	}
@@ -140,77 +133,65 @@ func GetPaymentType(payment *Payments) string {
 
 // ValidityCheck :
 //1. source wallet/bank does not exist or does not belong to user
-//2. negative amount
-//3. transaction amount is greater than wallet balance
-//4. destination bank does not exists as beneficiary
+//2. destination bank/wallet/beneficiary does not exist
+//3. negative amount
+//4. transaction amount is greater than wallet balance
 func ValidityCheck(payment *Payments, userId string) (err error) {
+	var SourceUserId, DestinationUserId string
+
+	if SourceUserId, err = GetUserIdFromFundId(payment.SourceId); err != nil {
+		return err
+	}
+	if SourceUserId != userId {
+		return errors.New("source does not belong to user")
+	}
+
+	if DestinationUserId, err = GetUserIdFromFundId(payment.DestinationId); err != nil {
+		return err
+	}
+	if DestinationUserId != userId {
+		return errors.New("destination does not belong to user")
+	}
+
 	if payment.Amount < 0 {
 		return errors.New("payment amount invalid")
 	}
-
-	if err = SourceValidityCheck(payment, userId); err != nil {
-		return err
-	}
-	if err = DestinationValidityCheck(payment); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func SourceValidityCheck(payment *Payments, userId string) (err error) {
-	var balance int
 	if strings.HasPrefix(payment.SourceId, wallet.Prefix) {
 		var Source wallet.Detail
-		err = wallet.GetWalletById(&Source, payment.SourceId)
-		if err != nil {
+		if err = wallet.GetWalletById(&Source, payment.SourceId); err != nil {
 			return errors.New("source wallet does not exist")
 		}
-		if Source.UserId != userId {
-			return errors.New("source wallet does not belong to user")
-		}
-		balance = Source.Balance
-		if balance < int(payment.Amount) {
+		balance := int64(Source.Balance)
+		if balance < payment.Amount {
 			return errors.New("low wallet balance")
 		}
-	} else if strings.HasPrefix(payment.SourceId, bank.Prefix) {
-		var Source bank.Detail
-		err = bank.GetBankById(&Source, payment.SourceId)
-		if err != nil {
-			return errors.New("source bank account does not exist")
-		}
-		if Source.UserId != userId {
-			return errors.New("source bank does not belong to user")
-		}
-	} else {
-		return errors.New("invalid source")
 	}
 	return nil
 }
 
-func DestinationValidityCheck(payment *Payments) (err error) {
-	if strings.HasPrefix(payment.DestinationId, wallet.Prefix) {
-		var Destination wallet.Detail
-		err = wallet.GetWalletById(&Destination, payment.DestinationId)
-		if err != nil {
-			return errors.New("destination wallet does not exist")
+func GetUserIdFromFundId(FundId string) (string, error) {
+	var userID string
+	if strings.HasPrefix(FundId, wallet.Prefix) {
+		var Source wallet.Detail
+		if err := wallet.GetWalletById(&Source, FundId); err != nil {
+			return "", errors.New("wallet does not exist")
 		}
-	} else if strings.HasPrefix(payment.DestinationId, bank.Prefix) {
-		var Destination bank.Detail
-		err = bank.GetBankById(&Destination, payment.DestinationId)
-		if err != nil {
-			return errors.New("destination bank account does not exist")
+		userID = Source.UserId
+	} else if strings.HasPrefix(FundId, bank.Prefix) {
+		var Source bank.Detail
+		if err := bank.GetBankById(&Source, FundId); err != nil {
+			return "", err
 		}
-	} else if strings.HasPrefix(payment.DestinationId, beneficiary.Prefix) {
-		var Destination beneficiary.Detail
-		err = beneficiary.GetBeneficiaryById(&Destination, payment.DestinationId)
-		if err != nil {
-			return errors.New("destination bank account does not exist as beneficiary")
+		userID = Source.UserId
+	} else if strings.HasPrefix(FundId, beneficiary.Prefix) {
+		var Source beneficiary.Detail
+		if err := beneficiary.GetBeneficiaryById(&Source, FundId); err != nil {
+			return "", err
 		}
-	} else {
-		return errors.New("invalid destination")
+		userID = Source.UserId
 	}
-	return nil
+	if userID!=""{return userID,nil}
+	return userID, errors.New("invalid fund id")
 }
 
 // InitiateRefund :A refund is initiated by Admin for given payment id and user id
@@ -245,29 +226,25 @@ func InitiateRefund(paymentID string, UserID string) (RefundID string, err error
 // InitiateCashback :Checks with campaign module if the payments is eligible for a cashback,
 // if yes, initiate a cashback to user wallet
 func InitiateCashback(payment *Payments) (err error) {
-	var userID string
-	if strings.HasPrefix(payment.SourceId, wallet.Prefix) {
-		var Source wallet.Detail
-		err = wallet.GetWalletById(&Source, payment.SourceId)
-		if err != nil {
-			return errors.New("failed to get wallet details")
-		}
-		userID = Source.UserId
-	} else {
-		var Source bank.Detail
-		err = bank.GetBankById(&Source, payment.SourceId)
-		if err != nil {
-			return errors.New("failed to get bank details")
-		}
-		userID = Source.UserId
-	}
+	userID, err := GetUserIdFromFundId(payment.SourceId)
+
 	Cashback := campaigns.Eligibility(payment.CreatedAt, payment.Amount, userID)
 	if Cashback > 0 {
+		var DestinationId string
+		if strings.HasPrefix(payment.SourceId, wallet.Prefix) {
+			DestinationId = payment.SourceId
+		} else {
+			var Wallet wallet.Detail
+			if err = wallet.GetWalletByUserId(&Wallet, userID); err != nil {
+				return err
+			}
+			DestinationId = Wallet.ID
+		}
 		var CashbackPayment Payments
 		CashbackPayment.ID = utilities.CreateID(Prefix, IDLength)
 		CashbackPayment.Amount = int64(Cashback)
 		CashbackPayment.SourceId = RzpWalletID
-		CashbackPayment.DestinationId = payment.SourceId
+		CashbackPayment.DestinationId = DestinationId
 		CashbackPayment.Type = PaymentTypeCashback
 		CashbackPayment.Status = PaymentStatusProcessing
 		InputPaymentsChannel <- &CashbackPayment
@@ -276,36 +253,21 @@ func InitiateCashback(payment *Payments) (err error) {
 	return nil
 }
 
-func GetUserIdFromFundId(FundId string) (string, error) {
-	var userID string
-	if strings.HasPrefix(FundId, wallet.Prefix) {
-		var Source wallet.Detail
-		err := wallet.GetWalletById(&Source, FundId)
-		if err != nil {
-			return "", err
-		}
-		userID = Source.UserId
-	} else {
-		var Source bank.Detail
-		err := bank.GetBankById(&Source, FundId)
-		if err != nil {
-			return "", err
-		}
-		userID = Source.UserId
-	}
-	return userID, nil
-}
-
-func UpdateTransactionCount(userID string) (err error) {
-	var User user.Detail
-	err = user.GetUserById(&User, userID)
+func UpdateTransactionCount(payment *Payments) (err error) {
+	id, err := GetUserIdFromFundId(payment.SourceId)
 	if err != nil {
-		return
+		return errors.New("failed to update payment , could not find user id for given fund id")
 	}
+
+	var User user.Detail
+	if err = user.GetUserById(&User, id); err != nil {
+		return errors.New("could not find the user")
+	}
+
 	mutex.Lock()
 	User.NumberOfTransactions = User.NumberOfTransactions + 1
 	mutex.Unlock()
-	//fmt.Println("user count is:",User.NumberOfTransactions)
+
 	config.DB.Table("user").Save(&User)
 	return nil
 }
