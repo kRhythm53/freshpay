@@ -2,14 +2,14 @@ package admin_session
 
 import (
 	"github.com/freshpay/internal/config"
-	"github.com/freshpay/internal/entities/user_management/utilities"
+	"github.com/freshpay/utilities"
 	"time"
 )
 
 
 //CreateSession will create a new user_session
 func CreateSession(session *Detail)(err error){
-	session.ID=utilities.CreateID(Prefix, IDLengthExcludingPrefix)
+	session.ID= utilities.CreateID(Prefix, IDLengthExcludingPrefix)
 	session.ExpireTime=uint64(time.Now().Unix()+ExpireTime)
 	if err=config.DB.Create(session).Error; err!=nil{
 		return err

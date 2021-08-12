@@ -2,28 +2,23 @@ package admin
 
 import (
 	"errors"
-	"fmt"
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/OTP"
 	"github.com/freshpay/internal/entities/admin/admin_session"
-	"github.com/freshpay/internal/entities/user_management/utilities"
+	"github.com/freshpay/utilities"
 )
 
 
 //SignUp will be used to create a admin on signup
 func SignUp(admin *Detail) (err error){
 	phoneNumber :=admin.PhoneNumber
-	/*
-	    Validate the phoneNumber-> Phone number is of 10 digits and only have 0-9 characters
-	 */
-	if len(phoneNumber)!=10 || phoneNumber[0]=='0'{
-		err=errors.New("phone number should be 10 digit long")
+
+	//Validate the input
+	err= ValidateInput(admin)
+	if err!=nil{
 		return err
 	}
-	if !utilities.IsNumeric(phoneNumber){
-		err=errors.New("Phone number can contain characters 0-9")
-		return err
-	}
+
 
 
 	/*
@@ -50,7 +45,7 @@ func SignUp(admin *Detail) (err error){
 	 Encrypt the password
 	*/
 	var passwordHash string
-	err=utilities.GetEncryption(admin.Password,&passwordHash)
+	err= utilities.GetEncryption(admin.Password,&passwordHash)
 	if err!=nil{
 		return err
 	}
@@ -58,7 +53,7 @@ func SignUp(admin *Detail) (err error){
 
 
 	//now create the admin
-	admin.ID=utilities.CreateID(Prefix,IDLengthExcludingPrefix)
+	admin.ID= utilities.CreateID(Prefix,IDLengthExcludingPrefix)
 
 	if err=config.DB.Create(admin).Error; err!=nil{
 		return err
@@ -87,36 +82,76 @@ func GetAdminByPhoneNumber(admin *Detail, phoneNumber string)(err error){
 	return nil
 }
 
-//Login will login the Admin and will create a user_session
+//Login will login the Admin and will create a admin _session
 func LoginByPassword(phoneNumber string, password string, Session *admin_session.Detail, admin *Detail)(err error) {
 	err = GetAdminByPhoneNumber(admin, phoneNumber)
-
-	if err == nil {
-		if !admin.IsVerified{
-			err=errors.New("Phone Number is not verified, please signup again")
-			fmt.Println(err)
-			/*
-			   need to remove this line
-			*/
-			return err
-		}
-		if !utilities.MatchPassword(password,admin.Password) {
-			err = errors.New("Password is Wrong")
-		} else {
-			err=admin_session.GetActiveSessionByAdminId(Session,admin.ID)
-			if err==nil{
-				return nil
-			}
-			Session.AdminId=admin.ID
-			err = admin_session.CreateSession(Session)
-		}
-	} else{
-		err=errors.New("Phone Number is wrong or not registered")
+	if err!=nil{
+		return errors.New("Phone Number is wrong or not registered")
 	}
+	if !admin.IsVerified {
+		return errors.New("Phone Number is not verified, please signup again")
+	}
+	if  !utilities.MatchPassword(password,admin.Password){
+		return errors.New("Password is Wrong")
+	}
+
+	err=admin_session.GetActiveSessionByAdminId(Session,admin.ID)
+	if err==nil{
+		return nil
+	}
+	Session.AdminId = admin.ID
+	err = admin_session.CreateSession(Session)
 	return err
 }
 
+//Login By Using OTP
+func LoginByOTP(PhoneNumber string)(err error){
+	return SendOTPToRegisteredNumber(PhoneNumber)
+}
 
+//Login By OTP Verification
+func LoginByOTPVerification(otp OTP.Detail,Session *admin_session.Detail, Admin *Detail)(err error){
+	err=OTP.VerifyOTP(otp)
+	if err!=nil{
+		return err
+	}
+	err=GetAdminByPhoneNumber(Admin,otp.PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	err=admin_session.GetActiveSessionByAdminId(Session,Admin.ID)
+	if err==nil{
+		return nil
+	}
+	Session.AdminId = Admin.ID
+	err = admin_session.CreateSession(Session)
+	return err
+}
+//Reset Password Using OTP at the registered Phone Number
+func ResetPasswordByOTP(PhoneNumber string)(err error){
+	return SendOTPToRegisteredNumber(PhoneNumber)
+}
+
+//Reset Password By OTP Verification
+func ResetPasswordByOTPVerification(otp OTP.Detail,password string) (err error) {
+	err=OTP.VerifyOTP(otp)
+	if err!=nil{
+		return err
+	}
+	var admin Detail
+	err=GetAdminByPhoneNumber(&admin,otp.PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	var passwordHash string
+	err=utilities.GetEncryption(password,&passwordHash)
+	if err!=nil {
+		return err
+	}
+	admin.Password=passwordHash
+	err=UpdateAdmin(&admin)
+	return err
+}
 
 
 //set verified admin by phone number
@@ -143,5 +178,26 @@ func UpdateAdmin(admin *Detail)(err error){
 //Delete a admin
 func DeleteAdmin(admin *Detail)(err error){
 	err=config.DB.Where("id = ?",admin.ID).Delete(admin).Error
+	return err
+}
+
+//Validate the Input
+func ValidateInput(admin *Detail) (err error){
+	err=utilities.ValidatePhoneNumber(admin.PhoneNumber)
+	return err
+}
+
+//Function to send OTP Registered Number
+func SendOTPToRegisteredNumber(PhoneNumber string)(err error){
+	err=utilities.ValidatePhoneNumber(PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	var tempAdmin Detail
+	err=GetAdminByPhoneNumber(&tempAdmin,PhoneNumber)
+	if err!=nil{
+		return errors.New("Phone Number is not registered, Please Signup first")
+	}
+	err=OTP.SendOTP(PhoneNumber)
 	return err
 }
