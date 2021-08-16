@@ -2,34 +2,26 @@ package user
 
 import (
 	"errors"
-	"fmt"
 	"github.com/freshpay/internal/config"
 	"github.com/freshpay/internal/entities/OTP"
 	"github.com/freshpay/internal/entities/user_management/user_session"
 	"github.com/freshpay/internal/entities/user_management/wallet"
-	utilities2 "github.com/freshpay/utilities"
+	"github.com/freshpay/utilities"
 
 	//"github.com/freshpay/internal/entities/user_management/wallet"
 )
 
-func VerifyPhoneNumber(phoneNumber string) bool {
-	if phoneNumber == "1" {
-		return false
-	}
-	return true
-}
-
 //SignUp will be used to create a user on signup
 func SignUp(user *Detail) (err error) {
 	phoneNumber := user.PhoneNumber
-	if len(phoneNumber)!=10 || phoneNumber[0]=='0'{
-		err=errors.New("phone number should be 10 digit long")
+
+	//Validate the Input
+	err= ValidateInput(user)
+
+	if err!=nil{
 		return err
 	}
-	if !utilities2.IsNumeric(phoneNumber){
-		err=errors.New("Phone number can contain characters 0-9")
-		return err
-	}
+
 	/*
 	   Make sure PhoneNumber doesn't exist
 	*/
@@ -44,18 +36,19 @@ func SignUp(user *Detail) (err error) {
 			return err
 		}
 	}
+
 	err = OTP.SendOTP(phoneNumber)
 	if err != nil {
 		return err
 	}
 	user.IsVerified=false
-	user.ID = utilities2.CreateID(Prefix, IDLengthExcludingPrefix)
+	user.ID = utilities.CreateID(Prefix, IDLengthExcludingPrefix)
 
 	/*
 	 Encrypt the password
-	 */
+	*/
 	var passwordHash string
-	err= utilities2.GetEncryption(user.Password,&passwordHash)
+	err= utilities.GetEncryption(user.Password,&passwordHash)
 	if err!=nil{
 		return err
 	}
@@ -107,29 +100,73 @@ func DeleteUser(user *Detail) (err error) {
 
 //Login will login the user and will create a user_session
 func LoginByPassword(phoneNumber string, password string, Session *user_session.Detail, user *Detail) (err error) {
+
 	err = GetUserByPhoneNumber(user, phoneNumber)
-	if err == nil {
-		if !user.IsVerified {
-			err = errors.New("Phone Number is not verified, please signup again")
-			fmt.Println(err)
-			/*
-			   need to remove this line
-			*/
-			return err
-		}
-		if  !utilities2.MatchPassword(password,user.Password){
-			err = errors.New("Password is Wrong")
-		} else {
-			err=user_session.GetActiveSessionByUserId(Session,user.ID)
-			if err==nil{
-				return nil
-			}
-			Session.UserId = user.ID
-			err = user_session.CreateSession(Session)
-		}
-	}else{
-		err=errors.New("Phone Number is wrong or not registered")
+	if err!=nil{
+		return errors.New("Phone Number is wrong or not registered")
 	}
+	if !user.IsVerified {
+		return errors.New("Phone Number is not verified, please signup again")
+	}
+	if  !utilities.MatchPassword(password,user.Password){
+		return errors.New("Password is Wrong")
+	}
+
+	err=user_session.GetActiveSessionByUserId(Session,user.ID)
+	if err==nil{
+		return nil
+	}
+	Session.UserId = user.ID
+	err = user_session.CreateSession(Session)
+	return err
+}
+
+//Login By Using OTP
+func LoginByOTP(PhoneNumber string)(err error){
+	return SendOTPToRegisteredNumber(PhoneNumber)
+}
+
+//Login By OTP Verification
+func LoginByOTPVerification(otp OTP.Detail,Session *user_session.Detail, User *Detail)(err error){
+	err=OTP.VerifyOTP(otp)
+	if err!=nil{
+		return err
+	}
+	err=GetUserByPhoneNumber(User,otp.PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	err=user_session.GetActiveSessionByUserId(Session,User.ID)
+	if err==nil{
+		return nil
+	}
+	Session.UserId = User.ID
+	err = user_session.CreateSession(Session)
+	return err
+}
+//Reset Password Using OTP at the registered Phone Number
+func ResetPasswordByOTP(PhoneNumber string)(err error){
+	return SendOTPToRegisteredNumber(PhoneNumber)
+}
+
+//Reset Password By OTP Verification
+func ResetPasswordByOTPVerification(otp OTP.Detail,password string) (err error) {
+	err=OTP.VerifyOTP(otp)
+	if err!=nil{
+		return err
+	}
+	var user Detail
+	err=GetUserByPhoneNumber(&user,otp.PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	var passwordHash string
+	err=utilities.GetEncryption(password,&passwordHash)
+	if err!=nil {
+		return err
+	}
+	user.Password=passwordHash
+	err=UpdateUser(&user)
 	return err
 }
 
@@ -141,5 +178,26 @@ func SetVerifiedUserByPhoneNumber(phoneNumber string) (err error) {
 		user.IsVerified = true
 		err = UpdateUser(&user)
 	}
+	return err
+}
+
+//Validate the Input
+func ValidateInput(user *Detail) (err error){
+	err=utilities.ValidatePhoneNumber(user.PhoneNumber)
+	return err
+}
+
+//Function to send OTP Registered Number
+func SendOTPToRegisteredNumber(PhoneNumber string)(err error){
+	err=utilities.ValidatePhoneNumber(PhoneNumber)
+	if err!=nil{
+		return err
+	}
+	var tempUser Detail
+	err=GetUserByPhoneNumber(&tempUser,PhoneNumber)
+	if err!=nil{
+		return errors.New("Phone Number is not registered, Please Signup first")
+	}
+	err=OTP.SendOTP(PhoneNumber)
 	return err
 }

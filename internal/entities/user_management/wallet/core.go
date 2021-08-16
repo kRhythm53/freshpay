@@ -3,13 +3,13 @@ package wallet
 import (
 	"fmt"
 	"github.com/freshpay/internal/config"
-	utilities2 "github.com/freshpay/utilities"
+	"github.com/freshpay/utilities"
 )
 
 //CreateWallet will create a new wallet
 func CreateWallet(userId string)(err error){
 	var wallet Detail
-	wallet.ID= utilities2.CreateID(Prefix, IDLengthExcludingPrefix)
+	wallet.ID= utilities.CreateID(Prefix, IDLengthExcludingPrefix)
 	wallet.UserId=userId
 	if err=config.DB.Create(&wallet).Error; err!=nil{
 		return err

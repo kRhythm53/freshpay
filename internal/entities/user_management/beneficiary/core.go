@@ -1,22 +1,17 @@
 package beneficiary
 
 import (
-	"errors"
 	"github.com/freshpay/internal/config"
-	utilities2 "github.com/freshpay/utilities"
+	"github.com/freshpay/utilities"
 )
 
 //CreateBeneficiary will create a new beneficiary
 func CreateBeneficiary(beneficiary *Detail,userId string)(err error){
-	if len(beneficiary.AccountNumber)<9 || len(beneficiary.AccountNumber)>18{
-		err=errors.New("Number of characters in account number should be b/w 9 and 18")
+	err=Validate(beneficiary)
+	if err!=nil{
 		return err
 	}
-	if len(beneficiary.IFSCCode) !=11{
-		err=errors.New("Number of characters in IFSCCode should be 11")
-		return err
-	}
-	beneficiary.ID= utilities2.CreateID(Prefix, IDLengthExcludingPrefix)
+	beneficiary.ID= utilities.CreateID(Prefix, IDLengthExcludingPrefix)
 	beneficiary.UserId=userId
 	if err=config.DB.Create(beneficiary).Error; err!=nil{
 		return err
@@ -39,4 +34,14 @@ func GetAllBeneficiaryAccountsByUserId(beneficiary *[]Detail,user_id string)(err
 		return err
 	}
 	return nil
+}
+
+//Validate Details
+func Validate(beneficiary *Detail) (err error){
+	err=utilities.ValidateBankAccountNumber(beneficiary.AccountNumber);
+	if err!=nil{
+		return err
+	}
+	err=utilities.ValidateIFSCCode(beneficiary.IFSCCode)
+	return err
 }

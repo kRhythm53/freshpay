@@ -2,21 +2,17 @@ package OTP
 
 import (
 	"errors"
-	"math"
-	"math/rand"
-	"strconv"
+	"fmt"
+	"github.com/freshpay/utilities"
+	"github.com/souvikhaldar/gobudgetsms"
 	"time"
 )
 
 
 /*
 will create a random number
- */
-func CreateOTP() string {
-	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
-	otp:=strconv.Itoa(seededRand.Intn(int(math.Pow(10,otp_length))))
-	return otp
-}
+*/
+
 
 
 // SetValue sets the key value pair
@@ -30,13 +26,20 @@ func SetValue(key string, value string, expiry time.Duration) error {
 // sendmessage will send sms using gobudgetsms
 func sendmessage(phoneNumber string, otp string) error{
 	return nil //need to remove this line to send message
+	message := "Your OTP for freshpay signup is " + otp
+	res, err := gobudgetsms.SendSMS(smsConfig, message,phoneNumber , "freshpay")
+	if err != nil {
+		return err
+	}
+	fmt.Println("The response after sending sms is ", res)
+	return nil
 }
 
 /*
 	this function will create otp and will send the otp and save the otp
- */
+*/
 func SendOTP(phoneNumber string)(err error){
-	otp:=CreateOTP()
+	otp:=utilities.CreateOTP(otp_length)
 	err=SetValue(phoneNumber,otp,ExpireTime)
 	if err!=nil{
 		//err=errors.New("Error in setting OTP to redis")
