@@ -6,7 +6,7 @@ import (
 	"github.com/freshpay/internal/entities/OTP"
 	"github.com/freshpay/internal/entities/user_management/user_session"
 	"github.com/freshpay/internal/entities/user_management/wallet"
-	 "github.com/freshpay/utilities"
+	"github.com/freshpay/utilities"
 
 	//"github.com/freshpay/internal/entities/user_management/wallet"
 )
@@ -46,7 +46,7 @@ func SignUp(user *Detail) (err error) {
 
 	/*
 	 Encrypt the password
-	 */
+	*/
 	var passwordHash string
 	err= utilities.GetEncryption(user.Password,&passwordHash)
 	if err!=nil{

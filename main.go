@@ -7,7 +7,7 @@ import (
 	"github.com/freshpay/internal/entities/admin/admin_session"
 	"github.com/freshpay/internal/entities/campaigns"
 	"github.com/freshpay/internal/entities/complaints"
-	payments2 "github.com/freshpay/internal/entities/payments/payments"
+	"github.com/freshpay/internal/entities/payments/payments"
 	"github.com/freshpay/internal/entities/payments/transactions"
 	"github.com/freshpay/internal/entities/user_management/bank"
 	"github.com/freshpay/internal/entities/user_management/beneficiary"
@@ -23,22 +23,28 @@ import (
 var err error
 
 func main() {
-	//config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
 	config.DB, err = gorm.Open(mysql.Open(config.DbURL(config.BuildDBConfig())), &gorm.Config{})
 	if err != nil {
 		fmt.Println("Status:", err)
 	}
 
-
-	//defer config.DB.Close()
-	config.DB.AutoMigrate(&payments2.Payments{},&transactions.Transactions{})
-	config.DB.AutoMigrate(&campaigns.Campaign{},&complaints.Complaint{})
-	config.DB.AutoMigrate(&admin.Detail{},&bank.Detail{},&user.Detail{},&beneficiary.Detail{},&user_session.Detail{},
-	&wallet.Detail{},&admin_session.Detail{})
+	err = config.DB.AutoMigrate(&payments.Payments{}, &transactions.Transactions{})
+	if err != nil {
+		return
+	}
+	err = config.DB.AutoMigrate(&campaigns.Campaign{}, &complaints.Complaint{})
+	if err != nil {
+		return
+	}
+	err = config.DB.AutoMigrate(&admin.Detail{}, &bank.Detail{}, &user.Detail{}, &beneficiary.Detail{}, &user_session.Detail{},
+		&wallet.Detail{}, &admin_session.Detail{})
+	if err != nil {
+		return
+	}
 
 	go transactions.InitiateTransaction()
-	go payments2.PaymentReceiver()
-	err := payments2.CreateRzpAccount()
+	go payments.PaymentReceiver()
+	err = payments.CreateRzpAccount()
 	if err != nil {
 		return
 

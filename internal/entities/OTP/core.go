@@ -37,7 +37,7 @@ func sendmessage(phoneNumber string, otp string) error{
 
 /*
 	this function will create otp and will send the otp and save the otp
- */
+*/
 func SendOTP(phoneNumber string)(err error){
 	otp:=utilities.CreateOTP(otp_length)
 	err=SetValue(phoneNumber,otp,ExpireTime)
