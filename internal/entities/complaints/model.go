@@ -10,7 +10,7 @@ type Complaint struct {
 	ComplaintType string `json:"complaint_type"`
 	Status        string `json:"status"`
 	Remark        string `json:"remark"`
-	PaymentsId    string `gorm:"default:''",json:"payments_id"`
+	PaymentsId    string `json:"payments_id"`
 	UserId        string `gorm:"default:''",json:"user_id"`
 	RefundId      string `gorm:"default:''",json:"refund_id"`
 	AdminId		  string `gorm:"default:''",json:"admin_id"`

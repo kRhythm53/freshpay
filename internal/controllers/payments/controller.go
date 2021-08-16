@@ -33,7 +33,8 @@ func GetPaymentByID(c *gin.Context) {
 	id := c.Params.ByName("payments_id")
 	err := payments.GetPaymentByID(&payment, id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest,base.Failure{Error: base.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
+		c.JSON(http.StatusBadRequest, base.Failure{Error: base.Error{Code: "Bad request error", Description: err.Error(), Source: "business", Reason: "validation failed", Step: "NA"}})
+	}else {
 		resp:= Response{Entity: "payments",Payment: payment}
 		c.JSON(http.StatusOK, resp)
 	}

@@ -149,7 +149,10 @@ func ValidityCheck(payment *Payments, userId string) (err error) {
 	if DestinationUserId, err = GetUserIdFromFundId(payment.DestinationId); err != nil {
 		return err
 	}
-	if DestinationUserId != userId {
+	if strings.HasPrefix(payment.DestinationId, beneficiary.Prefix) && DestinationUserId != userId {
+		return errors.New("destination does not belong to user")
+	}
+	if strings.HasPrefix(payment.DestinationId, bank.Prefix) && DestinationUserId != userId {
 		return errors.New("destination does not belong to user")
 	}
 
@@ -264,11 +267,10 @@ func UpdateTransactionCount(payment *Payments) (err error) {
 		return errors.New("could not find the user")
 	}
 
-	mutex.Lock()
 	User.NumberOfTransactions = User.NumberOfTransactions + 1
-	mutex.Unlock()
 
 	config.DB.Table("user").Save(&User)
+	//user.AddTransactionCountByUserId(id)
 	return nil
 }
 
