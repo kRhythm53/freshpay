@@ -1,7 +1,6 @@
 package campaigns
 
 import (
-	"fmt"
 	"github.com/freshpay/internal/entities/user_management/user"
 	"github.com/freshpay/utilities"
 	"math"
@@ -43,7 +42,7 @@ func Eligibility(Time int64, Amount int64, userid string) int {
 	} else {
 		index := -1
 		for i, entry := range ValidCampaigns {
-			fmt.Println(entry.IsActive, entry.Count)
+			//fmt.Println(entry.IsActive, entry.Count)
 			if entry.IsActive && entry.Count > 0 {
 				percentage := entry.PercentageRate
 				PercentageAmount := (float64(percentage)) * (float64(Amount)) / 100
